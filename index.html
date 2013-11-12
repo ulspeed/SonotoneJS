@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC Demo</title>  
+    <style>
+        video {
+            border:5px solid steelblue;
+            width:400px;
+            height:300px;
+        }
+        button {
+            font: 18px sans-serif;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body onload="initialize();">
+    <video id="localVideo" autoplay="true" style="width:320px; height:240px;"></video>
+    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:600px;height:480px"></video>
+    <p></p>
+    <button type="button" onclick="startVideo();">Pick my Video</button>
+    <button type="button" onclick="share();">Share my Screen</button>
+    <button type="button" onclick="call();">Call a Peer</button>
+    <button type="button" onclick="call2();">Call 2nd Peer</button>
+    <button type="button" onclick="call3();">Call 3rd Peer</button>
+    <button type="button" onclick="broadcast();">Call all Peers</button>
+    <button type="button" onclick="stopVideo();">Release Call</button>
+    <button type="button" onclick="sendAMessage();">SendMessage</button>
+    <footer id="footer">
+    </footer>
+    <script type="text/javascript" src="sonotone.js"></script>
+
+    <script>
+
+        var sono;
+
+        var users = [];
+
+        var isSharing = false;
+
+        function initialize() {
+
+            Sonotone.debug = true;
+            Sonotone.enableSTUN = false;
+
+            sono = new Sonotone.IO(new Date().getTime());
+
+            sono.transport('websocket', {host: '192.168.0.137', port: '1337'}).connect();
+            //sono.transport('websocket', {host: '172.26.165.49', port: '1337'}).connect();
+            //sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
+
+            sono.on('onPeerConnected', onPeerConnected, this);
+            sono.on('onPeerAlreadyConnected', onPeerConnected, this);
+            sono.on('onPeerDisconnected', onPeerDisconnected, this);
+            sono.on('onCallOffered', onCallOffered, this);
+            sono.on('onCallAnswered', onCallAnswered, this);
+            sono.on('onCallStarted', onCallStarted, this);
+            sono.on('onCallEnded', onCallEnded, this);
+            
+            sono.localMedia().on('onLocalStreamStarted', onLocalStreamStarted, this);
+            sono.localMedia().on('onLocalStreamEnded', onLocalStreamEnded, this);
+            sono.localMedia().on('onLocalStreamError', onLocalStreamError, this);
+            sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
+            sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
+        };
+
+        function startVideo() {
+
+            var constraints = {
+                audio: false,
+                video: true,
+                format: 'qvga'
+            };
+
+            sono.localMedia().acquire(constraints);
+        };
+
+        function stopVideo() {
+            sono.releaseCall();
+        };
+
+        function onPeerConnected(id) {
+            users.push(id);
+        };
+
+        function onCallOffered(fromID) {
+            sono.answer(fromID);
+        };
+
+        function onCallAnswered(fromID) {
+        };
+
+        function onCallStarted(fromID) {
+        };
+
+        function onCallEnded(fromID) {
+            document.getElementById('remoteVideo').src = '';
+        };
+
+        function onPeerDisconnected(id) {
+        };
+
+        function onLocalStreamStarted(stream) {
+            if( !isSharing) {
+                sono.localMedia().renderStream(document.getElementById('localVideo'));
+            }
+        };
+
+        function onLocalStreamEnded() {
+            document.getElementById('localVideo').src = '';
+        };
+
+        function onLocalStreamError(err) {
+            // can't get local stream
+        };
+
+        function onRemoteStreamStarted(stream) {
+            sono.remoteMedia().renderStream(document.getElementById('remoteVideo'));
+        };
+
+        function onRemoteStreamEnded() {
+            document.getElementById('remoteVideo').src = '';
+        };        
+
+        function onErrorReceived(error) {
+        };
+
+        function call() {
+            sono.call(users[0]);
+        };
+
+        function call2() {
+            sono.call(users[1]);
+        };
+
+        function call3() {
+            sono.call(users[2]);
+        };
+
+        function broadcast() {
+            sono.broadcastCall(users);
+        };
+
+        function sendAMessage() {
+            sono.sendMessage(
+                {
+                    data: {
+                        msg: new Date().getTime().toString(), 
+                        type: 'data'
+                    }, 
+                    recipient: 'all'
+                }
+            );
+        };
+
+        function share() {
+            isSharing = true;
+            sono.localMedia().acquireScreen();
+        };
+
+    </script>
+</body>
+</html>
