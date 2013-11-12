@@ -11,15 +11,11 @@ Sonotone is a WebRTC library that hides the client side WebRTC complexity
 
 Sonotone allows to
 
-- Call an other browser (Chrome or Firefox)
+- Call one or several others browsers (Chrome and Firefox)
 
-- Broadcast your video to all browsers connected
+- Share your screen several others browsers (from Chrome only)
 
-- Share your screen to an other browser (from Chrome)
-
-- Broadcast your screen to all browsers connected
-
-- Multi-party Audio/Video call (Audio/Video Conference)
+- Send file to one or several others browsers (from chrome only)
 
 Sonotone separates the Transport/SIG from the Media/PeerConnection by providing several ways to define the transport layer:
 
@@ -62,8 +58,18 @@ A Remote transport should be used if you already have your own tranport layer. I
 		sono.transport().receive(<your_JSON_data>);
 
 
+Build Sonotone.js library
+=========================
+
+You have to install grunt to build the Sonotone.js library
+
+	npm install -g grunt-cli	// To install the Grunt CLI
+	npm install 				// To install all others dependencies
+	grunt build 				// To build Sonotone.js
+
+
 Demo
-======================================
+===============
 
 Server side for the demo is based on node.js and use a WebSocket transport (See file server.js)
 
@@ -248,6 +254,12 @@ Screensharing requires:
 
 Versions
 ========
+
+v0.4.2: Wait for ACK before sending the next part of the file
+
+v0.4.1: Use chunk of 64ko to send files
+
+v0.4.0: Introducing DataChannel
 
 v0.3.4: Fix major issues on events subscriptions. Multi-party call supported.
 

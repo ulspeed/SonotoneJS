@@ -102,4 +102,7 @@ module.exports = function(grunt) {
     //Execute <code>grunt</code> to launch the default task: <code>watch</code>
     grunt.registerTask('default', ['watch']);
 
+    //Execute all tasks for building the Sonotone.js library
+    grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'usebanner']);
+
  };
