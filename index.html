@@ -28,7 +28,7 @@
     <button type="button" onclick="sendAMessage();">SendMessage</button>
     <footer id="footer">
     </footer>
-    <script type="text/javascript" src="sonotone.js"></script>
+    <script type="text/javascript" src="dist/sonotone.js"></script>
 
     <script>
 
@@ -45,7 +45,7 @@
 
             sono = new Sonotone.IO(new Date().getTime());
 
-            sono.transport('websocket', {host: '192.168.0.137', port: '1337'}).connect();
+            sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
             //sono.transport('websocket', {host: '172.26.165.49', port: '1337'}).connect();
             //sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
 
@@ -57,9 +57,9 @@
             sono.on('onCallStarted', onCallStarted, this);
             sono.on('onCallEnded', onCallEnded, this);
             
-            sono.localMedia().on('onLocalStreamStarted', onLocalStreamStarted, this);
-            sono.localMedia().on('onLocalStreamEnded', onLocalStreamEnded, this);
-            sono.localMedia().on('onLocalStreamError', onLocalStreamError, this);
+            sono.localMedia().on('onLocalVideoStreamStarted', onLocalStreamStarted, this);
+            sono.localMedia().on('onLocalVideoStreamEnded', onLocalStreamEnded, this);
+            sono.localMedia().on('onLocalVideoStreamError', onLocalStreamError, this);
             sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
             sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
         };
@@ -102,7 +102,7 @@
 
         function onLocalStreamStarted(stream) {
             if( !isSharing) {
-                sono.localMedia().renderStream(document.getElementById('localVideo'));
+                sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
             }
         };
 
