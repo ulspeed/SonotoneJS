@@ -255,7 +255,7 @@ Screensharing requires:
 Versions
 ========
 
-v0.4.2: Wait for ACK before sending the next part of the file
+v0.4.3: DataChannel: Wait for ACK before sending the next part of the file
 
 v0.4.1: Use chunk of 64ko to send files
 

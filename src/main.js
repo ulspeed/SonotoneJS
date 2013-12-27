@@ -21,7 +21,7 @@ if (typeof exports !== 'undefined') {
  * @api public
  */
 
-Sonotone.VERSION = '0.4.2';
+Sonotone.VERSION = '0.4.3';
 
 /**
  * ID
@@ -189,7 +189,7 @@ Sonotone.adapter = function() {
         
         Sonotone.isDataChannelCompliant = false;
 
-        if(Sonotone.browserVersion > 31) {
+        if(Sonotone.browserVersion >= 31) {
             Sonotone.isDataChannelCompliant = true;
         }
 

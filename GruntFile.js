@@ -41,6 +41,7 @@ module.exports = function(grunt) {
                     'src/transport/remote.js',
                     'src/transport/websocket.js',
                     'src/transport/socketio.js',
+                    'src/transport/sip.js',
                     'src/webrtc/peerconnection.js',
                     'src/webrtc/datachannel.js',
                     'src/event/events.js'

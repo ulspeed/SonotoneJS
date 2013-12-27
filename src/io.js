@@ -110,8 +110,8 @@ IO.prototype = {
                 case "socketio":
                     this._transport = new Sonotone.IO.SocketIOTransport(config);
                     break;
-                case "http":
-                    //Not yet available
+                case "sip":
+                     this._transport = new Sonotone.IO.SIPTransport(config);
                     break;
                 case "remote":
                     this._transport = new Sonotone.IO.RemoteTransport(config);

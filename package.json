@@ -11,7 +11,7 @@
     "email": "olivier.anguenot@alcatel-lucent.com",
     "url": "https://www.alcatel-lucent.com/"
   },
-  "version": "0.4.2",
+  "version": "0.4.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/oanguenot/sonotone.io"

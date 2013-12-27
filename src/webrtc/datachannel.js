@@ -17,7 +17,7 @@
 
         this._callbacks = new Sonotone.IO.Events();
 
-        this._dataChannel = null;
+        this._channel = null;
 
         this._file =[];
 
@@ -28,42 +28,44 @@
         var that = this;
 
         if(Sonotone.isDataChannelCompliant && hasRemoteDataChannel) {
-            this._dataChannel = peer.createDataChannel(id, { reliable : true });
+            this._channel = peer.createDataChannel(id, { reliable : true });
 
             // When data-channel is opened with remote peer
-            this._dataChannel.onopen = function(){
+            this._channel.onopen = function(){
                 Sonotone.log("DATACHANNEL", "Data-Channel opened with other peer");
                 that._isReady = true;
             };
 
             // On data-channel error
-            this._dataChannel.onerror = function(e){
+            this._channel.onerror = function(e){
                 Sonotone.log("DATACHANNEL", "Data-Channel error", e);
                 that._isReady = false;
             };
 
             // When data-channel is closed with remote peer
-            this._dataChannel.onclose = function(e){
+            this._channel.onclose = function(e){
                 Sonotone.log("DATACHANNEL", "Data-Channel close", e);
                 that._isReady = false;
             };
 
             // On new message received
-            this._dataChannel.onmessage = function(e){
+            this._channel.onmessage = function(e){
 
-                console.log("DataChannel, receive:", e);
+                //Sonotone.log("DATACHANNEL", "Received", e.data);
 
                 if(e.data instanceof ArrayBuffer) {
+                    //Sonotone.log("DATACHANNEL", "Type ArrayBuffer");
                     var blob = new Blob([e.data], {type: that._fileInfo.type});
                     that._file.push(blob);
 
                     var ack =  {
                         type: "ACK"
                     };
-
-                    that._dataChannel.send(ack);
+                    //Sonotone.log("DATACHANNEL", "Send ACK");
+                    that._channel.send(JSON.stringify(ack));
                 }
                 else if (e.data instanceof Blob) {
+                    //Sonotone.log("DATACHANNEL", "Type Blob");
                     that._file.push(e.data);
                 }
                 else {
@@ -71,19 +73,18 @@
                     try {
 
                         if(e.data.indexOf('{') === 0) {
-
+                            //Sonotone.log("DATACHANNEL", "Type SIG");
                             var jsonMessage = JSON.parse(e.data);
 
                             switch (jsonMessage.type) {
                                 case "FILE_START":
-                                    Sonotone.log("DATACHANNEL", "Start receiving a new file...", jsonMessage.content);
+                                    Sonotone.log("DATACHANNEL", "Start receiving file", jsonMessage.content);
                                     that._file = [];
                                     that._fileInfo = jsonMessage.content;
                                     break;
                                 case "FILE_END":
                                     var fullFile = new Blob(that._file);
-                                    Sonotone.log("DATACHANNEL", "File successfully received");
-
+                                    Sonotone.log("DATACHANNEL", "End receiving file");
                                     var file = {
                                         info: that._fileInfo,
                                         content: fullFile
@@ -92,9 +93,17 @@
                                     that._callbacks.trigger('onFileReceived', file); 
                                     break;
                                 case "ACK":
-                                    Sonotone.log("DATACHANNEL", "ACK from other side. Continue sending file part");
+                                    //Sonotone.log("DATACHANNEL", "Received ACK");
                                     if(that._remainingBlob.size) {
+                                        //Sonotone.log("DATACHANNEL", "Continue to send remaining file part");
                                         that._sendBlobFile(that._remainingBlob);
+                                    }
+                                    else {
+                                        //Sonotone.log("DATACHANNEL", "No more part to send");
+                                         var msg = {
+                                            type: "FILE_END"
+                                        };
+                                        that._channel.send(JSON.stringify(msg));
                                     }
                                     break;
                             }
@@ -103,21 +112,6 @@
                     catch(err) {
                         console.error(err);
                     }
-
-
-                    //that._callbacks.trigger('onJSONMessage', jsonMessage);
-/*
-                    if(e.data === "file") {
-                        that._file = [];
-                    }
-                    else if(e.data === "endfile") {
-                        var grosBlob = new Blob(that._file);
-                        saveAs(grosBlob, "myFile");
-                    }
-                    else {
-                        Sonotone.log("DATACHANNEL", "Received not managed type of data", typeof e.data);
-                    }
-                    */
                 }
 
             };        
@@ -157,7 +151,7 @@
         sendData: function(data) {
             if(this._isReady) {
                 Sonotone.log("DATACHANNEL", "Try to send a message to the peer <" + this._remotePeerID + ">");
-                this._dataChannel.send(data);
+                this._channel.send(data);
             }
             else {
                 Sonotone.log("DATACHANNEL", "Data Channel not ready for sennding a message!");
@@ -188,7 +182,7 @@
 
             Sonotone.log("DATACHANNEL", "Send a file to peer <" + this._remotePeerID + ">");
 
-            this._dataChannel.send(JSON.stringify(msg));
+            this._channel.send(JSON.stringify(msg));
 
             reader.onload = function(file) {
 
@@ -237,24 +231,7 @@
 
             fr.onload = function() {
                 that._remainingBlob = blob.slice(toSend.size);
-
-                that._dataChannel.send(this.result);
-
-                /*
-                if (that._remainingBlob.size) {
-                    setTimeout(function () {
-                        that._sendBlobFile(remainingBlob); // continue transmitting
-                    }, 500);
-                }
-                else {
-                    setTimeout(function () {
-                        var msg = {
-                            type: "FILE_END"
-                        };
-                        that._dataChannel.send(JSON.stringify(msg));
-                    }, 50); 
-                    
-                }*/
+                that._channel.send(this.result);
             };
             
             fr.readAsArrayBuffer(toSend);

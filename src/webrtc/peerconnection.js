@@ -106,6 +106,10 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
         that._callbacks.trigger('onOpen', null);  
     };
 
+    this._peer.getStats(function(raw) {
+        console.log("STATS", raw);
+    });
+
     this._peerReady = true;
 };
 
