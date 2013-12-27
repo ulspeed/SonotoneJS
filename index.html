@@ -15,8 +15,8 @@
     </style>
 </head>
 <body onload="initialize();">
-    <video id="localVideo" autoplay="true" style="width:10px; height:10px;"></video>
-    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:10px;height:10px"></video>
+    <video id="localVideo" autoplay="true" style="width:320px; height:240px;"></video>
+    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:600px;height:480px"></video>
     <p></p>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="share();">Share my Screen</button>
@@ -45,7 +45,9 @@
 
             sono = new Sonotone.IO(new Date().getTime());
 
-            sono.transport('websocket', {host: window.location.hostname, port: 1337}).connect();
+            sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
+            //sono.transport('websocket', {host: '172.26.165.49', port: '1337'}).connect();
+            //sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
 
             sono.on('onPeerConnected', onPeerConnected, this);
             sono.on('onPeerAlreadyConnected', onPeerConnected, this);
@@ -56,8 +58,8 @@
             sono.on('onCallEnded', onCallEnded, this);
             
             sono.localMedia().on('onLocalVideoStreamStarted', onLocalStreamStarted, this);
-            sono.localMedia().on('onLocalStreamEnded', onLocalStreamEnded, this);
-            sono.localMedia().on('onLocalStreamError', onLocalStreamError, this);
+            sono.localMedia().on('onLocalVideoStreamEnded', onLocalStreamEnded, this);
+            sono.localMedia().on('onLocalVideoStreamError', onLocalStreamError, this);
             sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
             sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
         };
@@ -65,13 +67,12 @@
         function startVideo() {
 
             var constraints = {
-                audio: true,
+                audio: false,
                 video: true,
                 format: 'qvga'
             };
 
             sono.localMedia().acquire(constraints);
-
         };
 
         function stopVideo() {
@@ -100,23 +101,9 @@
         };
 
         function onLocalStreamStarted(stream) {
-
-            console.log("localStarted");
-
             if( !isSharing) {
                 sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
             }
-
-            window.AudioContext = window.AudioContext || window.webkitAudioContext;
-            var audioContext = new AudioContext();
-
-            // Create an AudioNode from the stream.
-            var mediaStreamSource = audioContext.createMediaStreamSource( stream );
-
-            console.log("media:", mediaStreamSource);
-
-            
-
         };
 
         function onLocalStreamEnded() {
