@@ -409,12 +409,12 @@ IO.prototype = {
 
             var that = this;
 
-            this._localMedia.on('onLocalStreamStarted', function() {
+            this._localMedia.on('onLocalVideoStreamStarted', function() {
                 Sonotone.log("SONOTONE.IO", "Local Media successfully initialized");
 
             }, this);
 
-            this._localMedia.on('onLocalStreamEnded', function() {
+            this._localMedia.on('onLocalVideoStreamEnded', function() {
                 Sonotone.log("SONOTONE.IO", "Local Media stopped");
 
                 for(var peerID in this._peerConnections) {
@@ -435,7 +435,7 @@ IO.prototype = {
 
             }, this);
 
-            this._localMedia.on('onLocalStreamError', function(err) {
+            this._localMedia.on('onLocalVideoStreamError', function(err) {
                 Sonotone.log("SONOTONE.IO", "Error on Local Media: " + err);
             }, this);
         }
