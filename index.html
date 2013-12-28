@@ -26,6 +26,9 @@
     <button type="button" onclick="broadcast();">Call all Peers</button>
     <button type="button" onclick="stopVideo();">Release Call</button>
     <button type="button" onclick="sendAMessage();">SendMessage</button>
+    <button type="button" onclick="stats();">Stats</button>
+    <button type="button" onclick="stopStats();">Stop Stats</button>
+
     <footer id="footer">
     </footer>
     <script type="text/javascript" src="dist/sonotone.js"></script>
@@ -56,6 +59,8 @@
             sono.on('onCallAnswered', onCallAnswered, this);
             sono.on('onCallStarted', onCallStarted, this);
             sono.on('onCallEnded', onCallEnded, this);
+
+            sono.on('onPeerConnectionStats', onStats, this);
             
             sono.localMedia().on('onLocalVideoStreamStarted', onLocalStreamStarted, this);
             sono.localMedia().on('onLocalVideoStreamEnded', onLocalStreamEnded, this);
@@ -157,6 +162,18 @@
             isSharing = true;
             sono.localMedia().acquireScreen();
         };
+
+        function stats() {
+            sono.setStats(users[0].id);
+        };
+
+        function stopStats() {
+            sono.stopStats(users[0].id);
+        };
+
+        function onStats(event) {
+            console.log("GET STATS", event);
+        }
 
     </script>
 </body>
