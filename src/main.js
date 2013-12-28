@@ -105,6 +105,14 @@ Sonotone.browserVersion = "Unknown";
 Sonotone.isHTTPS = false;
 
 /**
+ *
+ * WebRTC Statistics
+ *
+ * @api public
+ */
+ Sonotone.isStatsActivated = false;
+
+/**
  * Logger
  *
  * @api private

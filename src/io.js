@@ -167,6 +167,7 @@ IO.prototype = {
 
     peerConnections: function(id, caps) {
         if(this._peerConnections[id] === undefined) {
+            Sonotone.log("SONOTONE.IO", "PeerConnections not found, create a new one...", id);
             this._peerConnections[id] = new Sonotone.IO.PeerConnection(id, caps);
             this._subscribeToPeerConnectionEvent(this._peerConnections[id]);
         }
@@ -322,6 +323,14 @@ IO.prototype = {
             canShareScreen: Sonotone.isSharingCompliant && Sonotone.isHTTPS,
             canShareData: Sonotone.isDataChannelCompliant
         };
+    },
+
+    setStats: function(id) {
+        this.peerConnections(id).activateStats();
+    },
+
+    stopStats: function(id) {
+        this.peerConnections(id).stopStats();
     },
 
     /**
@@ -582,10 +591,8 @@ IO.prototype = {
 
         }, this);
 
-         // Listen to Answer to send
+        // Listen to Answer to send
         peer.on('onFileReceived', function(event) {
-
-            console.log("io");
 
             var msg = {
                 issuer: peer.ID(),
@@ -594,6 +601,11 @@ IO.prototype = {
 
             this._callbacks.trigger('onFileReceived', msg);
 
+        }, this);
+
+        // Listen to peerConnection statistics
+        peer.on('onPeerConnectionStats', function(event) {
+            this._callbacks.trigger('onPeerConnectionStats', event);
         }, this);
     
     },

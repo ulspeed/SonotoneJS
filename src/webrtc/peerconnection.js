@@ -13,9 +13,13 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this.isCaller = false;
 
+    this.raw = null;
+
     this.answerCreated = false;
 
     this.isConnected = false;
+
+    this.statID = '';
 
     if(Sonotone.enableSTUN) {
         Sonotone.log("PEERCONNECTION", "Use STUN Server", Sonotone.STUN);
@@ -105,10 +109,6 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
         Sonotone.log("PEERCONNECTION", "On Open for PEER CONNECTION <" + that._id + ">", event);
         that._callbacks.trigger('onOpen', null);  
     };
-
-    this._peer.getStats(function(raw) {
-        console.log("STATS", raw);
-    });
 
     this._peerReady = true;
 };
@@ -354,11 +354,42 @@ PeerConnection.prototype = {
     _subscribeToDataChannelEvents: function() {
         var that = this;
 
-        console.log("peer");
-
         this._dataChannel.on('onFileReceived', function(file) {
             that._callbacks.trigger('onFileReceived', file);
         }, this);
+    },
+
+    /**
+     * Activate the stats for the peerConnection
+     *
+     * @api public
+     */
+
+    activateStats: function() {
+            
+        Sonotone.log("PEERCONNECTION", "Activate stat for PeerConnection <" + this._id + ">");
+
+        var that = this;
+
+        this.statID = setInterval(function() {
+
+            that._peer.getStats(function(raw) {
+
+                var event = {
+                    peer: that._id,
+                    raw: raw
+                };
+
+                that._callbacks.trigger('onPeerConnectionStats', event);
+                return  raw;
+            });
+
+        }, 1000);
+    },
+
+    stopStats: function() {
+        Sonotone.log("PEERCONNECTION", "Stop stat for PeerConnection <" + this._id + ">");
+        clearInterval(this.statID);
     }
 
 };
