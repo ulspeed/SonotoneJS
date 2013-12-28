@@ -79,12 +79,11 @@
             sono.releaseCall();
         };
 
-        function onPeerConnected(id) {
-            users.push(id);
+        function onPeerConnected(user) {
+            users.push(user);
         };
 
         function onCallOffered(fromID) {
-            alert("answer");
             sono.answer(fromID);
         };
 
@@ -115,8 +114,8 @@
             // can't get local stream
         };
 
-        function onRemoteStreamStarted(stream) {
-            sono.remoteMedia().renderStream(document.getElementById('remoteVideo'));
+        function onRemoteStreamStarted(id) {
+            sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), id);
         };
 
         function onRemoteStreamEnded() {
@@ -127,15 +126,15 @@
         };
 
         function call() {
-            sono.call(users[0]);
+            sono.call(users[0].id);
         };
 
         function call2() {
-            sono.call(users[1]);
+            sono.call(users[1].id);
         };
 
         function call3() {
-            sono.call(users[2]);
+            sono.call(users[2].id);
         };
 
         function broadcast() {

@@ -131,6 +131,8 @@ wsServer.on('request', function(request) {
             
             var caller = msg.caller;
 
+            var callee = msg.callee;
+
             console.log("RECEIVED from <" + caller + ">:" + evt.utf8Data);
 
             if(msg.data.type === "join") {
@@ -163,11 +165,11 @@ wsServer.on('request', function(request) {
                 }
 
             } else {
-                if(msg.data.callee !== "all") {
+                if(callee !== "all") {
 
                      for (var i = 0;i < connections.length; i++) {
                         console.log("Connections:" + connections[i].id);
-                        if(connections[i].id === msg.callee) {
+                        if(connections[i].id === callee) {
                             console.log("Send message <" + msg.data.type + "> to <" + connections[i].id + ">");
                             connections[i].socket.send(evt.utf8Data);
                         }

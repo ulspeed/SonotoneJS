@@ -360,9 +360,10 @@ IO.prototype = {
                         this.peerConnections(msg.caller).setRemoteDescription(new Sonotone.RTCSessionDescription(msg.data));
                         break;
                     case 'candidate':
-                        if(this.peerConnections(msg.caller).answerCreated || this.peerConnections(msg.caller).isCaller) {
-                            if(!this.peerConnections(msg.caller).isConnected) {
-                                this.peerConnections(msg.caller).addIceCandidate(msg.data);
+                        var peer = this.peerConnections(msg.caller); 
+                        if(peer.answerCreated || peer.isCaller) {
+                            if(!peer.isConnected) {
+                                peer.addIceCandidate(msg.data);
                             }
                             else {
                                 Sonotone.log("SONOTONE.IO", "Don't add this Candidate because PEERCONNECTION <" + msg.caller + "> is already connected");
