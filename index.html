@@ -45,7 +45,7 @@
 
             sono = new Sonotone.IO(new Date().getTime());
 
-            sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
+            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect();
             //sono.transport('websocket', {host: '172.26.165.49', port: '1337'}).connect();
             //sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
 
@@ -84,6 +84,7 @@
         };
 
         function onCallOffered(fromID) {
+            alert("answer");
             sono.answer(fromID);
         };
 
