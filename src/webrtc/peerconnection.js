@@ -371,17 +371,112 @@ PeerConnection.prototype = {
 
         var that = this;
 
+            this.bytesPrevUp = 0;
+            this.timestampPrevUp = 0;
+            this.bytesPrevDown = 0;
+            this.timestampPrevDown = 0;
+            this.bytesRateUp = 0;
+            this.bytesRateDown = 0;
+
+
         this.statID = setInterval(function() {
+
 
             that._peer.getStats(function(raw) {
 
-                var event = {
-                    peer: that._id,
-                    raw: raw
+                // Augumentation of stats entries with utility functions.
+                // The augumented entry does what the stats entry does, but adds
+                // utility functions.
+                function AugumentedStatsResponse(response) {
+                  this.response = response;
+                  this.addressPairMap = [];
+                }
+
+                AugumentedStatsResponse.prototype.collectAddressPairs = function(componentId) {
+                    if (!this.addressPairMap[componentId]) {
+                        this.addressPairMap[componentId] = [];
+                        for (var i = 0; i < this.response.result().length; ++i) {
+                            var res = this.response.result()[i];
+                            if (res.type ==='googCandidatePair' && res.stat('googChannelId') === componentId) {
+                                this.addressPairMap[componentId].push(res);
+                            }
+                        }
+                    }
+                    return this.addressPairMap[componentId];
                 };
 
-                that._callbacks.trigger('onPeerConnectionStats', event);
-                return  raw;
+                AugumentedStatsResponse.prototype.result = function() {
+                    return this.response.result();
+                };
+
+                // The indexed getter isn't easy to prototype.
+                AugumentedStatsResponse.prototype.get = function(key) {
+                    return this.response[key];
+                };
+
+                var stats = new AugumentedStatsResponse(raw);
+
+                var results = stats.result();
+                var bytesNow = 0;
+
+                var up = true;
+
+                for (var j = 0; j < results.length; ++j) {
+                    var res = results[j];
+                    console.log("res.type" + j + "=" + res.type);
+                    if (res.type === 'ssrc') {
+
+                        if(res.stat('bytesReceived')) {
+                            bytesNow = res.stat('bytesReceived');
+                            console.log("bytesNowDown =", bytesNow);
+                            up = false;
+                        }
+                        else {
+                            bytesNow = res.stat('bytesSent');
+                            console.log("bytesNowUp =", bytesNow);
+                            up = true;
+                        }
+                           
+                        console.log("up", up);
+                       if(up) {
+                            console.log("timestampPrevUp", that.timestampPrevUp, res.timestamp.getTime() / 1000);
+                            if (that.timestampPrevUp > 0) {
+                                console.log("oui");
+                                that.bytesRateUp = Math.round((bytesNow - that.bytesPrevUp) / (res.timestamp.getTime() / 1000 - that.timestampPrevUp));
+                            }
+                            that.timestampPrevUp = res.timestamp.getTime() / 1000;
+                            console.log("TimePrevUp after", that.timestampPrevUp);
+                            that.bytesPrevUp = bytesNow;
+                        }
+                       else {
+                            if (that.timestampPrevDown > 0) {
+                                that.bytesRateDown = Math.round((bytesNow - that.bytesPrevDown) / (res.timestamp - that.timestampPrevDown));
+                                
+                            }
+                            that.timestampPrevDown = res.timestamp.getTime() / 1000;
+                            that.bytesPrevDown = bytesNow;
+                        }
+
+                        if (res.names) {
+                            var names = res.names();
+                            for (var i = 0; i < names.length; ++i) {
+   //                             console.log("GET " + names[i] + " VALUE " + res.stat(names[i]));
+                            }
+                        }
+                    }
+                    // This is the video flow.
+                    //videoFlowInfo = extractVideoFlowInfo(res, stats);
+                }
+
+                var e = {
+                    peerId: that._id,
+                    bytesRateUp: that.bytesRateUp,
+                    bytesRateDown: that.bytesRateDown
+                };
+
+                that._callbacks.trigger('onPeerConnectionStats', e);
+                //console.log("GET STATS " + i, res);
+                
             });
 
         }, 1000);

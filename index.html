@@ -108,6 +108,18 @@
         };
 
         function onPeerDisconnected(id) {
+            var indexToRemove = -1;
+
+            for (var i=0; i < users.length; i++) {
+                if(users[i].id === id) {
+                    indexToRemove = i;
+                }
+            }
+            if(indexToRemove > -1) {
+                users[indexToRemove] = null;
+                delete users[indexToRemove];
+                indexToRemove = -1;    
+            }
         };
 
         function onLocalStreamStarted(stream) {
@@ -136,6 +148,7 @@
         };
 
         function call() {
+            console.log("users", users);
             sono.call(users[0].id);
         };
 
@@ -169,82 +182,17 @@
         };
 
         function stats() {
-            console.log("Statss for ", users[0].id);
-            sono.setStats(users[0].id);
-            
+            sono.setStats();
         };
 
         function stopStats() {
-            sono.stopStats(users[0].id);
+            sono.stopStats();
         };
 
         function onStats(event) {
-
-            stats = new AugumentedStatsResponse(event.raw);
-            var statsString = '';
-            var results = stats.result();
-
-            for (var i = 0; i < results.length; ++i) {
-                var res = results[i];
-  //              console.log("res.type=" + res.type);
-                if (res.type == 'ssrc') {
-
-                    bytesNow = res.stat('bytesReceived') || res.stat('bytesSent');
-                    
-                    if (timestampPrev > 0) {
-                        var bitRate = Math.round((bytesNow - bytesPrev) /
-                             (res.timestamp - timestampPrev));
-                        console.log(bitRate + ' KB/sec');
-                    }
-                    timestampPrev = res.timestamp;
-                    bytesPrev = bytesNow;
-
-                    if (res.names) {
-                        names = res.names();
-                        for (var i = 0; i < names.length; ++i) {
-                            //console.log("GET " + names[i] + " VALUE " + res.stat(names[i]));
-                        }
-                    }
-                    // This is the video flow.
-                    //videoFlowInfo = extractVideoFlowInfo(res, stats);
-                }
-                //console.log("GET STATS " + i, res);
-
-            }
+            console.log("STATS:", event);
+            
         }
-
-        // Augumentation of stats entries with utility functions.
-        // The augumented entry does what the stats entry does, but adds
-        // utility functions.
-        function AugumentedStatsResponse(response) {
-          this.response = response;
-          this.addressPairMap = [];
-        }
-
-        AugumentedStatsResponse.prototype.collectAddressPairs = function(componentId) {
-          if (!this.addressPairMap[componentId]) {
-            this.addressPairMap[componentId] = [];
-            for (var i = 0; i < this.response.result().length; ++i) {
-              var res = this.response.result()[i];
-              if (res.type == 'googCandidatePair' &&
-                  res.stat('googChannelId') == componentId) {
-                this.addressPairMap[componentId].push(res);
-              }
-            }
-          }
-          return this.addressPairMap[componentId];
-        }
-
-        AugumentedStatsResponse.prototype.result = function() {
-          return this.response.result();
-        }
-
-        // The indexed getter isn't easy to prototype.
-        AugumentedStatsResponse.prototype.get = function(key) {
-          return this.response[key];
-        }
-
-
     </script>
 </body>
 </html>

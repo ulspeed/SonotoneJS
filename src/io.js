@@ -325,12 +325,18 @@ IO.prototype = {
         };
     },
 
-    setStats: function(id) {
-        this.peerConnections(id).activateStats();
+    setStats: function() {
+        // Start stat for each peerConnection
+        for (var peerID in this._peerConnections) {
+            this._peerConnections[peerID].activateStats();
+        }
     },
 
-    stopStats: function(id) {
-        this.peerConnections(id).stopStats();
+    stopStats: function() {
+        // Stop stat for each peerConnection
+        for (var peerID in this._peerConnections) {
+            this._peerConnections[peerID].stopStats();
+        }
     },
 
     /**
