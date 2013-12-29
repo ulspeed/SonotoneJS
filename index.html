@@ -41,6 +41,10 @@
 
         var isSharing = false;
 
+        var bytesNow, bytesPrev = 0;
+        var timestampPrev;
+        var answerID = '';
+
         function initialize() {
 
             Sonotone.debug = true;
@@ -74,7 +78,7 @@
             var constraints = {
                 audio: false,
                 video: true,
-                format: 'qvga'
+                format: 'hd'
             };
 
             sono.localMedia().acquire(constraints);
@@ -89,6 +93,7 @@
         };
 
         function onCallOffered(fromID) {
+            console.log("fromID=" + fromID);
             sono.answer(fromID);
         };
 
@@ -164,7 +169,9 @@
         };
 
         function stats() {
+            console.log("Statss for ", users[0].id);
             sono.setStats(users[0].id);
+            
         };
 
         function stopStats() {
@@ -172,8 +179,71 @@
         };
 
         function onStats(event) {
-            console.log("GET STATS", event);
+
+            stats = new AugumentedStatsResponse(event.raw);
+            var statsString = '';
+            var results = stats.result();
+
+            for (var i = 0; i < results.length; ++i) {
+                var res = results[i];
+  //              console.log("res.type=" + res.type);
+                if (res.type == 'ssrc') {
+
+                    bytesNow = res.stat('bytesReceived') || res.stat('bytesSent');
+                    
+                    if (timestampPrev > 0) {
+                        var bitRate = Math.round((bytesNow - bytesPrev) /
+                             (res.timestamp - timestampPrev));
+                        console.log(bitRate + ' KB/sec');
+                    }
+                    timestampPrev = res.timestamp;
+                    bytesPrev = bytesNow;
+
+                    if (res.names) {
+                        names = res.names();
+                        for (var i = 0; i < names.length; ++i) {
+                            //console.log("GET " + names[i] + " VALUE " + res.stat(names[i]));
+                        }
+                    }
+                    // This is the video flow.
+                    //videoFlowInfo = extractVideoFlowInfo(res, stats);
+                }
+                //console.log("GET STATS " + i, res);
+
+            }
         }
+
+        // Augumentation of stats entries with utility functions.
+        // The augumented entry does what the stats entry does, but adds
+        // utility functions.
+        function AugumentedStatsResponse(response) {
+          this.response = response;
+          this.addressPairMap = [];
+        }
+
+        AugumentedStatsResponse.prototype.collectAddressPairs = function(componentId) {
+          if (!this.addressPairMap[componentId]) {
+            this.addressPairMap[componentId] = [];
+            for (var i = 0; i < this.response.result().length; ++i) {
+              var res = this.response.result()[i];
+              if (res.type == 'googCandidatePair' &&
+                  res.stat('googChannelId') == componentId) {
+                this.addressPairMap[componentId].push(res);
+              }
+            }
+          }
+          return this.addressPairMap[componentId];
+        }
+
+        AugumentedStatsResponse.prototype.result = function() {
+          return this.response.result();
+        }
+
+        // The indexed getter isn't easy to prototype.
+        AugumentedStatsResponse.prototype.get = function(key) {
+          return this.response[key];
+        }
+
 
     </script>
 </body>
