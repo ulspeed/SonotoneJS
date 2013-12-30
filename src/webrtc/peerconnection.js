@@ -373,15 +373,14 @@ PeerConnection.prototype = {
 
         var that = this;
 
-            this.bytesPrevUp = 0;
-            this.timestampPrevUp = 0;
-            this.bytesPrevDown = 0;
-            this.timestampPrevDown = 0;
-            this.bytesRateUp = 0;
-            this.bytesRateDown = 0;
+        this.bytesPrevUp = 0;
+        this.timestampPrevUp = 0;
+        this.bytesPrevDown = 0;
+        this.timestampPrevDown = 0;
+        this.bytesRateUp = 0;
+        this.bytesRateDown = 0;
 
         this.statID = setInterval(function() {
-
 
             that._peer.getStats(function(raw) {
 
@@ -419,55 +418,80 @@ PeerConnection.prototype = {
 
                 var results = stats.result();
                 var bytesNow = 0;
-
-                var up = true;
+                var mic=0, speaker=0;
 
                 for (var j = 0; j < results.length; ++j) {
                     var res = results[j];
-                    //console.log("res.type" + j + "=" + res.type);
+
+                    console.log("TYPE", res.type, res);
+
+                    // Bandwidth
                     var timestamp = res.timestamp.getTime() / 1000;
                     if (res.type === 'ssrc') {
 
                         if(res.stat('bytesReceived')) {
                             bytesNow = res.stat('bytesReceived');
-                            up = false;
+                            
+                            if (that.timestampPrevDown > 0 && that.timestampPrevDown < timestamp) {
+                                that.bytesRateDown = Math.round((Math.abs(bytesNow - that.bytesPrevDown) / Math.abs(timestamp - that.timestampPrevDown)) / 1024 * 8);
+                                console.log("DOWN", bytesNow, that.bytesPrevDown, timestamp, that.timestampPrevDown);
+                            }
+                            if(that.timestampPrevDown < timestamp) {
+                                that.timestampPrevDown = timestamp;
+                                that.bytesPrevDown = bytesNow;    
+                            }
+                            
                         }
                         else {
                             bytesNow = res.stat('bytesSent');
-                            up = true;
-                        }
-                           
-                       if(up) {
-                            if (that.timestampPrevUp > 0) {
-                                that.bytesRateUp = Math.round(((bytesNow - that.bytesPrevUp) / (timestamp - that.timestampPrevUp)) / 1024);
+                            
+                            if (that.timestampPrevUp > 0 && that.timestampPrevUp < timestamp) {
+                                that.bytesRateUp = Math.round((Math.abs(bytesNow - that.bytesPrevUp) / Math.abs(timestamp - that.timestampPrevUp)) / 1024 * 8);
+                                console.log("UP", bytesNow, that.bytesPrevUp, timestamp, that.timestampPrevUp);
                             }
-                            that.timestampPrevUp = timestamp;
-                            that.bytesPrevUp = bytesNow;
-                        }
-                       else {
-                            if (that.timestampPrevDown > 0) {
-                                that.bytesRateDown = Math.round(((bytesNow - that.bytesPrevDown) / (timestamp - that.timestampPrevDown)) / 1024);
-                                
-                            }
-                            that.timestampPrevDown = timestamp;
-                            that.bytesPrevDown = bytesNow;
-                        }
-
-                        if (res.names) {
-                            var names = res.names();
-                            for (var i = 0; i < names.length; ++i) {
-   //                             console.log("GET " + names[i] + " VALUE " + res.stat(names[i]));
+                            if(that.timestampUp < timestamp) {
+                                that.timestampPrevUp = timestamp;
+                                that.bytesPrevUp = bytesNow;
                             }
                         }
                     }
-                    // This is the video flow.
-                    //videoFlowInfo = extractVideoFlowInfo(res, stats);
+
+                    // ActivityDetection
+                    var obj = res.remote;
+                    if (obj) {
+                        var nspk = 0.0;
+                        var nmic = 0.0;
+                        
+                        if (obj.stat('audioInputLevel')) {
+                            nmic = obj.stat('audioInputLevel');
+                        }
+                        if (nmic > 0.0) {
+                            mic = Math.floor(Math.max((Math.LOG2E * Math.log(nmic) - 4.0), 0.0));
+                        }
+                        if (obj.stat('audioOutputLevel')) {
+                            nspk = obj.stat('audioOutputLevel');
+                        }
+                        if (nspk > 0.0) {
+                            speaker = Math.floor(Math.max((Math.LOG2E * Math.log(nspk) - 4.0), 0.0));
+                        }
+                    }
+
+                    /*
+                        if (res.names) {
+                            var names = res.names();
+                            for (var i = 0; i < names.length; ++i) {
+                                console.log("GET " + names[i] + " VALUE " + res.stat(names[i]));
+                            }
+                        }
+                    */
                 }
 
                 var e = {
                     peerId: that._id,
                     bytesRateUp: that.bytesRateUp,
-                    bytesRateDown: that.bytesRateDown
+                    bytesRateDown: that.bytesRateDown,
+                    micro: mic,
+                    speaker: speaker
                 };
 
                 that._callbacks.trigger('onPeerConnectionStats', e);
@@ -476,45 +500,6 @@ PeerConnection.prototype = {
             });
 
         }, 1000);
-
-/*
-        function voiceActivityDetection(peer) {
-        if (moz) return;
-
-        peer.getStats(function(stats) {
-            var output = { };
-            var sr = stats.result();
-            for (var i = 0; i < sr.length; i++) {
-                var obj = sr[i].remote;
-                if (obj) {
-                    var nspk = 0.0;
-                    var nmic = 0.0;
-                    if (obj.stat('audioInputLevel')) {
-                        nmic = obj.stat('audioInputLevel');
-                    }
-                    if (nmic > 0.0) {
-                        output.mic = Math.floor(Math.max((Math.LOG2E * Math.log(nmic) - 4.0), 0.0));
-                    }
-                    if (obj.stat('audioOutputLevel')) {
-                        nspk = obj.stat('audioOutputLevel');
-                    }
-                    if (nspk > 0.0) {
-                        output.speaker = Math.floor(Math.max((Math.LOG2E * Math.log(nspk) - 4.0), 0.0));
-                    }
-                }
-            }
-            log('mic intensity:', output.mic);
-            log('speaker intensity:', output.speaker);
-            log('Type <window.skipRTCMultiConnectionLogs=true> to stop this logger.');
-        });
-
-        if (!window.skipRTCMultiConnectionLogs)
-            setTimeout(function() {
-                voiceActivityDetection(peer);
-            }, 2000);
-    }
-*/
-
     },
 
     stopStats: function() {
