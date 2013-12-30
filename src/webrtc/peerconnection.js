@@ -423,37 +423,32 @@ PeerConnection.prototype = {
 
                 for (var j = 0; j < results.length; ++j) {
                     var res = results[j];
-                    console.log("res.type" + j + "=" + res.type);
+                    //console.log("res.type" + j + "=" + res.type);
+                    var timestamp = res.timestamp.getTime() / 1000;
                     if (res.type === 'ssrc') {
 
                         if(res.stat('bytesReceived')) {
                             bytesNow = res.stat('bytesReceived');
-                            console.log("bytesNowDown =", bytesNow);
                             up = false;
                         }
                         else {
                             bytesNow = res.stat('bytesSent');
-                            console.log("bytesNowUp =", bytesNow);
                             up = true;
                         }
                            
-                        console.log("up", up);
                        if(up) {
-                            console.log("timestampPrevUp", that.timestampPrevUp, res.timestamp.getTime() / 1000);
                             if (that.timestampPrevUp > 0) {
-                                console.log("oui");
-                                that.bytesRateUp = Math.round((bytesNow - that.bytesPrevUp) / (res.timestamp.getTime() / 1000 - that.timestampPrevUp));
+                                that.bytesRateUp = Math.round(((bytesNow - that.bytesPrevUp) / (timestamp - that.timestampPrevUp)) / 1024);
                             }
-                            that.timestampPrevUp = res.timestamp.getTime() / 1000;
-                            console.log("TimePrevUp after", that.timestampPrevUp);
+                            that.timestampPrevUp = timestamp;
                             that.bytesPrevUp = bytesNow;
                         }
                        else {
                             if (that.timestampPrevDown > 0) {
-                                that.bytesRateDown = Math.round((bytesNow - that.bytesPrevDown) / (res.timestamp - that.timestampPrevDown));
+                                that.bytesRateDown = Math.round(((bytesNow - that.bytesPrevDown) / (timestamp - that.timestampPrevDown)) / 1024);
                                 
                             }
-                            that.timestampPrevDown = res.timestamp.getTime() / 1000;
+                            that.timestampPrevDown = timestamp;
                             that.bytesPrevDown = bytesNow;
                         }
 
