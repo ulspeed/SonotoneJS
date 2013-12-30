@@ -339,6 +339,16 @@ IO.prototype = {
         }
     },
 
+    mute: function(callee, audio, video) {
+        var peer = this.peerConnections(callee, null);
+        peer.createOffer(this.localMedia().isScreenCaptured(), {action: 'mute', audio: audio, video: video});
+    },
+
+    unmute: function(callee, audio, video) {
+        var peer = this.peerConnections(callee, null);
+        peer.createOffer(this.localMedia().isScreenCaptured(), {action: 'unmute', audio: audio, video: video});      
+    },
+
     /**
      * Subscribe to transport event
      *

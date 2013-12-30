@@ -205,11 +205,12 @@ PeerConnection.prototype = {
     /**
      * Create an offer to one or several peers
      * @param {Boolean} isScreencaptured True if the screen has captured
+     * @param {Object} fct The action to do on the peerConnection SDP
      *
      * @api public
      */ 
 
-    createOffer: function(screenCaptured) {
+    createOffer: function(screenCaptured, fct) {
 
         var sdpConstraints = {
             'mandatory': {
@@ -229,7 +230,20 @@ PeerConnection.prototype = {
         var that = this;
     
         this._peer.createOffer(function(offerSDP) {
-        
+
+            if(fct) {
+                switch (fct.action) {
+                    case 'mute':
+                        offerSDP = that.muteSDP(offerSDP, fct.audio, fct.video);
+                        break;
+                    case 'unmute':
+                        offerSDP = that.unmuteSDP(offerSDP, fct.audio, fct.video);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            
             //offerSDP.sdp = preferOpus(offerSDP.sdp);
             that.setLocalDescription(offerSDP);
             
@@ -345,19 +359,7 @@ PeerConnection.prototype = {
         this._dataChannel.sendFile(file);
     },
 
-    /**
-     * Subscribe to datachannel events
-     *
-     * @api private
-     */
-
-    _subscribeToDataChannelEvents: function() {
-        var that = this;
-
-        this._dataChannel.on('onFileReceived', function(file) {
-            that._callbacks.trigger('onFileReceived', file);
-        }, this);
-    },
+    
 
     /**
      * Activate the stats for the peerConnection
@@ -377,7 +379,6 @@ PeerConnection.prototype = {
             this.timestampPrevDown = 0;
             this.bytesRateUp = 0;
             this.bytesRateDown = 0;
-
 
         this.statID = setInterval(function() {
 
@@ -475,11 +476,161 @@ PeerConnection.prototype = {
             });
 
         }, 1000);
+
+/*
+        function voiceActivityDetection(peer) {
+        if (moz) return;
+
+        peer.getStats(function(stats) {
+            var output = { };
+            var sr = stats.result();
+            for (var i = 0; i < sr.length; i++) {
+                var obj = sr[i].remote;
+                if (obj) {
+                    var nspk = 0.0;
+                    var nmic = 0.0;
+                    if (obj.stat('audioInputLevel')) {
+                        nmic = obj.stat('audioInputLevel');
+                    }
+                    if (nmic > 0.0) {
+                        output.mic = Math.floor(Math.max((Math.LOG2E * Math.log(nmic) - 4.0), 0.0));
+                    }
+                    if (obj.stat('audioOutputLevel')) {
+                        nspk = obj.stat('audioOutputLevel');
+                    }
+                    if (nspk > 0.0) {
+                        output.speaker = Math.floor(Math.max((Math.LOG2E * Math.log(nspk) - 4.0), 0.0));
+                    }
+                }
+            }
+            log('mic intensity:', output.mic);
+            log('speaker intensity:', output.speaker);
+            log('Type <window.skipRTCMultiConnectionLogs=true> to stop this logger.');
+        });
+
+        if (!window.skipRTCMultiConnectionLogs)
+            setTimeout(function() {
+                voiceActivityDetection(peer);
+            }, 2000);
+    }
+*/
+
     },
 
     stopStats: function() {
         Sonotone.log("PEERCONNECTION", "Stop stat for PeerConnection <" + this._id + ">");
         clearInterval(this.statID);
-    }
+    },
+
+    muteSDP: function(sd, muteAudio, muteVideo) {
+        Sonotone.log("PEERCONNECTION", "Mute PeerConnection <" + this._id + ">");
+
+        // Split SDP into lines
+        var sdpLines = sd.sdp.split('\r\n');
+        var replaceVideo = false;
+        var replaceAudio = false;
+        var l = sdpLines.length;
+        
+        if(muteVideo) {
+            for(var i=0; i<l; i++) {
+            
+                if(sdpLines[i].search('m=video') !== -1) {
+                    replaceVideo = true;
+                    continue;
+                }
+
+                if(replaceVideo) {
+                    if(sdpLines[i].search('a=sendrecv') !== -1) {
+                        sdpLines[i] = 'a=recvonly';
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(muteAudio) {
+            for(var j=0; j<l; j++) {
+            
+                if(sdpLines[j].search('m=audio') !== -1) {
+                    replaceAudio = true;
+                    continue;
+                }
+
+                if(replaceAudio) {
+                    if(sdpLines[j].search('a=sendrecv') !== -1) {
+                        sdpLines[j] = 'a=recvonly';
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Reconstruct SDP
+        sd.sdp = sdpLines.join('\r\n');
+        return sd;
+
+    },
+
+    unmuteSDP: function(sd, unmuteAudio, unmuteVideo) {
+        Sonotone.log("PEERCONNECTION", "Unmute PeerConnection <" + this._id + ">");
+
+        // Split SDP into lines
+        var sdpLines = sd.sdp.split('\r\n');
+        var replaceVideo = false;
+        var replaceAudio = false;
+        var l = sdpLines.length;
+
+        if(unmuteVideo) {
+            for(var i=0; i<l; i++) {
+            
+                if(sdpLines[i].search('m=video') !== -1) {
+                    replaceVideo = true;
+                    continue;
+                }
+
+                if(replaceVideo) {
+                    if(sdpLines[i].search('a=recvonly') !== -1) {
+                        sdpLines[i] = 'a=sendrecv';
+                        break;
+                    }
+                }
+            }
+        }
+
+        if(unmuteAudio) {
+            for(var j=0; j<l; j++) {
+            
+                if(sdpLines[j].search('m=audio') !== -1) {
+                    replaceAudio = true;
+                    continue;
+                }
+
+                if(replaceAudio) {
+                    if(sdpLines[j].search('a=recvonly') !== -1) {
+                        sdpLines[j] = 'a=sendrecv';
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Reconstruct SDP
+        sd.sdp = sdpLines.join('\r\n');
+        return sd;
+    },
+
+    /**
+     * Subscribe to datachannel events
+     *
+     * @api private
+     */
+
+    _subscribeToDataChannelEvents: function() {
+        var that = this;
+
+        this._dataChannel.on('onFileReceived', function(file) {
+            that._callbacks.trigger('onFileReceived', file);
+        }, this);
+    },
 
 };

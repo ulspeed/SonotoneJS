@@ -28,6 +28,8 @@
     <button type="button" onclick="sendAMessage();">SendMessage</button>
     <button type="button" onclick="stats();">Stats</button>
     <button type="button" onclick="stopStats();">Stop Stats</button>
+    <button type="button" onclick="mute();">Mute</button>
+    <button type="button" onclick="unmute();">Unmute</button>
 
     <footer id="footer">
     </footer>
@@ -76,7 +78,7 @@
         function startVideo() {
 
             var constraints = {
-                audio: false,
+                audio: true,
                 video: true,
                 format: 'hd'
             };
@@ -108,6 +110,7 @@
         };
 
         function onPeerDisconnected(id) {
+            console.log("Disconnected=", id);
             var indexToRemove = -1;
 
             for (var i=0; i < users.length; i++) {
@@ -116,9 +119,9 @@
                 }
             }
             if(indexToRemove > -1) {
-                users[indexToRemove] = null;
-                delete users[indexToRemove];
-                indexToRemove = -1;    
+                var removed = users.splice(indexToRemove, 1);
+                console.log("Removed", removed);
+                removed = null;
             }
         };
 
@@ -187,6 +190,16 @@
 
         function stopStats() {
             sono.stopStats();
+        };
+
+        function mute() {
+            document.getElementById('localVideo').setAttribute('muted', 'muted');
+            sono.mute(users[0].id, true, true);
+        };
+
+        function unmute() {
+            document.getElementById('localVideo').removeAttribute('muted');
+            sono.unmute(users[0].id, true, true);
         };
 
         function onStats(event) {
