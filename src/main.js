@@ -49,70 +49,6 @@ Sonotone.debug = false;
 Sonotone.enableSTUN = true;
 
 /**
- * Is the browser audio/video compliant with WebRTC
- *
- * @api public
- */
-
-Sonotone.isAudioVideoCompliant = false;
-
-/**
- * Is the browser sharing compliant with WebRTC
- *
- * @api public
- */
-
-Sonotone.isSharingCompliant = false;
-
-/**
- * Is the browser able to view a desktop shared using WebRTC
- *
- * @api public
- */
-
-Sonotone.isSharingViewerCompliant = false;
-
-/**
- * Is the browser compliant with the DataChannel
- *
- * @api public
- */
-
-Sonotone.isDataChannelCompliant = false;
-
-/**
- * Browser detected: chrome, firefox or unknown
- *
- * @api public
- */
-
-Sonotone.browser = "Unknown";
-
-/**
- * Version of the browser detected: XX or Unkown
- *
- * @api public
- */
-
-Sonotone.browserVersion = "Unknown";
-
-/**
- * Is the protocol HTTPS used ?
- *
- * @api public
- */
-
-Sonotone.isHTTPS = false;
-
-/**
- *
- * WebRTC Statistics
- *
- * @api public
- */
- Sonotone.isStatsActivated = false;
-
-/**
  * Logger
  *
  * @api private
@@ -129,7 +65,8 @@ Sonotone.log = function(cat, msg, arg) {
             "PEERCONNECTION": 'Maroon',
             "REMOTEMEDIA": "MediumPurple",
             "TODO": "cyan",
-            "DATACHANNEL": "Crimson"
+            "DATACHANNEL": "Crimson",
+            "CAPABILITIES": "black"
         };
 
         var time = new Date();
@@ -152,20 +89,8 @@ Sonotone.log = function(cat, msg, arg) {
 
 Sonotone.adapter = function() {
 
-    // Detect if HTTPS protocol is used
-    Sonotone.isHTTPS = window.location.protocol === "http:" ? false : true;
-
     if(navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
-        // Firefox: Can make call but not sharing
-        Sonotone.isAudioVideoCompliant = true;
-        Sonotone.isSharingCompliant = false;
-        Sonotone.isSharingViewerCompliant = true;
-        Sonotone.isDataChannelCompliant = false;
-
-        Sonotone.browser = "Firefox";
-
-        Sonotone.browserVersion = parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
-
+        // Firefox
         Sonotone.getUserMedia = navigator.mozGetUserMedia.bind(navigator); 
 
         Sonotone.RTCPeerConnection = window.mozRTCPeerConnection; 
@@ -185,22 +110,6 @@ Sonotone.adapter = function() {
     }
     else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
         // Chrome: can make call or Sharing
-        Sonotone.isAudioVideoCompliant = true;
-       
-        Sonotone.isSharingViewerCompliant = true;
-
-        Sonotone.isSharingCompliant = true;
-
-        Sonotone.browser = "Chrome";
-
-        Sonotone.browserVersion = parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
-        
-        Sonotone.isDataChannelCompliant = false;
-
-        if(Sonotone.browserVersion >= 31) {
-            Sonotone.isDataChannelCompliant = true;
-        }
-
         Sonotone.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
 
         Sonotone.RTCSessionDescription = window.RTCSessionDescription;
@@ -209,8 +118,6 @@ Sonotone.adapter = function() {
         Sonotone.RTCPeerConnection = window.webkitRTCPeerConnection;
 
         Sonotone.constraints = {optional: [{DtlsSrtpKeyAgreement: true}]};
-
-        // {RtpDataChannels: true }
 
         Sonotone.attachToMedia = function(element, stream) {
             if (typeof element.srcObject !== 'undefined') {
@@ -231,13 +138,6 @@ Sonotone.adapter = function() {
                 }
             ]
         };
-    } else {
-        // Others browsers: can do nothing
-        Sonotone.isAudioVideoCompliant = false;
-        Sonotone.isSharingCompliant = false;
-        Sonotone.isSharingViewerCompliant = false;
-        Sonotone.isDataChannelCompliant = false;
-        Sonotone.log("SONOTONE.IO", "Started on a not compliant browser. Sorry you can't use sonotone.IO");
     }
 };
 

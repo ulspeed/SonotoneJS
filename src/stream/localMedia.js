@@ -4,7 +4,7 @@
  * @namespace
  */
 
-var LocalMedia = Sonotone.IO.LocalMedia = function() {
+var LocalMedia = Sonotone.IO.LocalMedia = function(caps) {
     Sonotone.log("LOCALMEDIA", "LocalMedia initialized");
 
     this._requestUserMediaPending = false;
@@ -18,6 +18,7 @@ var LocalMedia = Sonotone.IO.LocalMedia = function() {
     this._isScreenCaptured = false;
     this._isCameraCaptured = false;
 
+    this._caps = caps;
 };
 
 /**
@@ -114,7 +115,7 @@ LocalMedia.prototype = {
      */
 
     acquire: function(constraints) {
-        if(!this._requestUserMediaPending && Sonotone.isAudioVideoCompliant) {
+        if(!this._requestUserMediaPending && this._caps.canDoAudioVideoCall) {
 
             var that = this;
 
@@ -127,19 +128,19 @@ LocalMedia.prototype = {
             }
             else if(constraints.audio) {
                 Sonotone.log("LOCALMEDIA", "Ask for audio only", mediaConstraints);
-                if(Sonotone.browser === "firefox") {
+                if(this._caps.browser === "firefox") {
                     //mediaConstraints.video = false;
                 }
             }
             else if(constraints.video) {
                 Sonotone.log("LOCALMEDIA", "Ask for video only", mediaConstraints);
-                if(Sonotone.browser === "firefox") {
+                if(this._caps.browser === "firefox") {
                     //mediaConstraints.audio = false;
                 }
             }
             else {
                 Sonotone.log("LOCALMEDIA", "Ask for no media", mediaConstraints);
-                 if(Sonotone.browser === "firefox") {
+                 if(this._caps.browser === "firefox") {
                     //mediaConstraints.audio = false;
                     //mediaConstraints.video = false;
                 }
@@ -164,7 +165,7 @@ LocalMedia.prototype = {
             });
         }  
         else {
-            if(!Sonotone.isAudioVideoCompliant) {
+            if(!this._caps.canDoAudioVideoCall) {
                 Sonotone.log("LOCALMEDIA", "Browser not compliant for Audio/Video Communication");  
                 this._callbacks.trigger('onLocalVideoStreamError', {code: 2, message:"", name: "BROWSER_NOT_COMPLIANT"});
             }
@@ -222,7 +223,7 @@ LocalMedia.prototype = {
     acquireScreen: function(constraints) {
 
         // Screen sharing seems to work only using HTTPS
-        if(Sonotone.isSharingCompliant && Sonotone.isHTTPS) {
+        if(this._caps.canDoScreenSharing) {
             var that = this;
 
             var maxWidth = screen.width;
@@ -265,13 +266,14 @@ LocalMedia.prototype = {
             });
         }
         else {
-            if(!Sonotone.isSharingCompliant) {
-                Sonotone.log("LOCALMEDIA", "Browser not compliant for Desktop/Application sharing");  
-                this._callbacks.trigger('onLocalScreenStreamError', {code: 2, message:"", name: "BROWSER_NOT_COMPLIANT"});
-            }
-            else if (!Sonotone.isHTTPS) {
+            if(!this._caps.startedWithHTTPS) {
                 Sonotone.log("LOCALMEDIA", "Protocol should be HTTPS");  
                 this._callbacks.trigger('onLocalScreenStreamError', {code: 3, message:"", name: "PROTOCOL_ERROR"});
+                
+            }
+            else {
+                Sonotone.log("LOCALMEDIA", "Browser not compliant for Desktop/Application sharing");  
+                this._callbacks.trigger('onLocalScreenStreamError', {code: 2, message:"", name: "BROWSER_NOT_COMPLIANT"});    
             }
         }
     },

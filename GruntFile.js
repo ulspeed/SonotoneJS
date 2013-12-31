@@ -36,6 +36,7 @@ module.exports = function(grunt) {
                 src: [
                     'src/main.js', 
                     'src/io.js',
+                    'src/peer/capabilities.js',
                     'src/stream/localMedia.js',
                     'src/stream/remoteMedia.js', 
                     'src/transport/remote.js',

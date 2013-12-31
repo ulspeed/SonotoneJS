@@ -4,7 +4,7 @@
  * @namespace
  */
 
-var WebSocketTransport = Sonotone.IO.WebSocketTransport = function(config) {
+var WebSocketTransport = Sonotone.IO.WebSocketTransport = function(config, caps) {
     this._host = config.host;
     this._port = config.port;
     this._transportReady = false;
@@ -12,6 +12,7 @@ var WebSocketTransport = Sonotone.IO.WebSocketTransport = function(config) {
     this._callbacks = new Sonotone.IO.Events();
     this._id = new Date().getTime();
     this._room = null;
+    this._caps = caps;
 
     if(this._port) {
         Sonotone.log("TRANSPORT", "Creating a WebSocket transport to " + this._host + ":" + this._port);
@@ -30,13 +31,13 @@ WebSocketTransport.prototype = {
 
     /**
      * Connect the Transport
-     * @param {Object} caps The user capabilities that have to be transmitted to others peers (nickname, audio/video capabilities...)
+     * @param {Object} data The user capabilities that have to be transmitted to others peers (nickname, audio/video capabilities...)
      * @param {String} code, The conference code (room)
      *
      * @api public
      */
 
-    connect: function(caps, code) {
+    connect: function(data, code) {
         if(!this._socket) {
             Sonotone.log("TRANSPORT", "Try to connect to SIG server");
             
@@ -60,7 +61,8 @@ WebSocketTransport.prototype = {
                     {
                         data: {
                             type: 'join',
-                            caps: caps
+                            data: data,
+                            caps: that._caps
                         },
                         caller: Sonotone.ID, 
                         callee: 'all',

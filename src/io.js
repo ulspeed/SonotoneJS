@@ -10,9 +10,6 @@ var IO = Sonotone.IO = function(id) {
     // Display Sonotone.IO version in logs
     Sonotone.log("SONOTONE.IO", "Running v" + Sonotone.VERSION);
 
-    // Display Browser version
-    Sonotone.log("SONOTONE.IO", "Started on " + Sonotone.browser  + " v" + Sonotone.browserVersion);
-
     /**
      * Sonotone ID
      *
@@ -30,12 +27,20 @@ var IO = Sonotone.IO = function(id) {
     this._transport = null;
 
     /**
+     * Capabilities
+     *
+     * @api private
+     */
+
+    this._capabilities = new Sonotone.IO.Capabilities();
+
+    /**
      * Local stream
      *
      * @api private
      */
 
-    this._localMedia = new Sonotone.IO.LocalMedia();
+    this._localMedia = new Sonotone.IO.LocalMedia(this.caps());
 
     /**
      * Remote stream
@@ -105,7 +110,7 @@ IO.prototype = {
 
             switch (name) {
                 case "websocket":
-                    this._transport = new Sonotone.IO.WebSocketTransport(config);
+                    this._transport = new Sonotone.IO.WebSocketTransport(config, this.caps());
                     break;
                 case "socketio":
                     this._transport = new Sonotone.IO.SocketIOTransport(config);
@@ -154,6 +159,15 @@ IO.prototype = {
         }
 
         return this._remoteMedia;
+    },
+
+    /**
+     * Get the user Capabilities
+     *
+     * @api public
+     */
+    caps: function() {
+        return this._capabilities.caps();
     },
 
     /**
@@ -313,16 +327,6 @@ IO.prototype = {
 
     setSTUNServer: function(stun) {
         Sonotone.STUN = {"iceServers": [{"url": stun}]};
-    },
-
-    capabilities: function() {
-        return {
-            canViewVideo: Sonotone.isAudioVideoCompliant,
-            canShareVideo: Sonotone.isAudioVideoCompliant,
-            canViewScreen: Sonotone.isSharingViewerCompliant,
-            canShareScreen: Sonotone.isSharingCompliant && Sonotone.isHTTPS,
-            canShareData: Sonotone.isDataChannelCompliant
-        };
     },
 
     setStats: function() {
