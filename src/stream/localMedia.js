@@ -13,8 +13,6 @@ var LocalMedia = Sonotone.IO.LocalMedia = function(caps) {
     this._streamVideo = null;
     this._streamScreen = null;
 
-    this._mediaReady = false;
-
     this._isScreenCaptured = false;
     this._isCameraCaptured = false;
 
@@ -152,7 +150,6 @@ LocalMedia.prototype = {
                 Sonotone.log("LOCALMEDIA", "User has granted access to local media - Camera");              
                 that._streamVideo = _stream;
                 that._requestUserMediaPending = false;
-                that._mediaReady = true;
                 that._subscribeToStreamEvent(that._streamVideo);
                 that._isCameraCaptured = true;
                 that._callbacks.trigger('onLocalVideoStreamStarted', that._streamVideo);
@@ -160,7 +157,6 @@ LocalMedia.prototype = {
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media", _error);   
                 that._requestUserMediaPending = false;
                 that._isCameraCaptured = false;
-                that._mediaReady = false;
                 that._callbacks.trigger('onLocalVideoStreamError', {code: 1, message:"", name: "PERMISSION_DENIED"});
             });
         }  
@@ -193,7 +189,7 @@ LocalMedia.prototype = {
      */
 
     releaseScreen: function() {
-         if(this._mediaReady && this._isScreenCaptured) {
+         if(this._isScreenCaptured) {
             Sonotone.log("LOCALMEDIA", "Stop local media - Screen stream...");
             this._streamScreen.stop();
             this._callbacks.trigger('onLocalScreenStreamEnded', this._streamScreen);
@@ -207,7 +203,7 @@ LocalMedia.prototype = {
      */
 
     releaseVideo: function() {
-         if(this._mediaReady && this._isVideoCaptured) {
+         if(this._isCameraCaptured) {
             Sonotone.log("LOCALMEDIA", "Stop local media - Video stream...");
             this._streamVideo.stop();
             this._callbacks.trigger('onLocalVideoStreamEnded', this._streamScreen);
@@ -247,13 +243,15 @@ LocalMedia.prototype = {
                 optional: []
             };
 
+            Sonotone.log("LOCALMEDIA", "Ask for screen media", video_constraints);
+
             Sonotone.getUserMedia({
                 video: video_constraints
             }, function(_stream) {
                 Sonotone.log("LOCALMEDIA", "User has granted access to local media - Screen");              
                 that._streamScreen = _stream;
+                console.log("stream", _stream);
                 that._requestUserMediaPending = false;
-                that._mediaReady = true;
                 that._isScreenCaptured = true;
                 that._subscribeToStreamEvent(that._streamScreen);
                 that._callbacks.trigger('onLocalScreenStreamStarted', that._streamScreen);
@@ -261,7 +259,6 @@ LocalMedia.prototype = {
                 that._isScreenCaptured = false;
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media - Screen", _erroronstreaming);   
                 that._requestUserMediaPending = false;
-                that._mediaReady = false;
                 that._callbacks.trigger('onLocalScreenStreamError', {code: 1, message:"", name: "PERMISSION_DENIED"});
             });
         }
@@ -311,16 +308,6 @@ LocalMedia.prototype = {
     renderScreenStream: function(HTMLMediaElement) {
         Sonotone.log("LOCALMEDIA", "Render the local stream - Screen"); 
         Sonotone.attachToMedia(HTMLMediaElement, this._streamScreen);
-    },
-
-    /**
-     * Is the Local Media ready (= captured from the camera)
-     *
-     * @api public
-     */
-
-    ready: function() {
-        return this._mediaReady;
     },
 
     /**

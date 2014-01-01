@@ -15,8 +15,9 @@
     </style>
 </head>
 <body onload="initialize();">
-    <video id="localVideo" autoplay="true" style="width:320px; height:240px;"></video>
-    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:600px;height:480px"></video>
+    <video id="localVideo" autoplay="true" style="width:160px; height:120px;"></video>
+    <video id="screenVideo" autoplay="true" style="width:160px; height:120px;"></video>
+    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:320px;height:240px"></video>
     <p></p>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="share();">Share my Screen</button>
@@ -69,7 +70,9 @@
             sono.on('onPeerConnectionStats', onStats, this);
             
             sono.localMedia().on('onLocalVideoStreamStarted', onLocalStreamStarted, this);
+            sono.localMedia().on('onLocalScreenStreamStarted', onLocalScreenStreamStarted, this);
             sono.localMedia().on('onLocalVideoStreamEnded', onLocalStreamEnded, this);
+            sono.localMedia().on('onLocalScreenStreamEnded', onLocalScreenStreamEnded, this);
             sono.localMedia().on('onLocalVideoStreamError', onLocalStreamError, this);
             sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
             sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
@@ -126,14 +129,20 @@
         };
 
         function onLocalStreamStarted(stream) {
-            if( !isSharing) {
-                sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
-            }
+            sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
         };
+
+        function onLocalScreenStreamStarted(stream) {
+            sono.localMedia().renderScreenStream(document.getElementById('screenVideo'));
+        }
 
         function onLocalStreamEnded() {
             document.getElementById('localVideo').src = '';
         };
+
+        function onLocalScreenStreamEnded() {
+            document.getElementById('screenVideo').src = '';
+        }
 
         function onLocalStreamError(err) {
             // can't get local stream
