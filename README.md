@@ -28,7 +28,7 @@ Documentation
 =============
 
 SonotoneJS documentation API can be found here: 
-[a link](http://oanguenot.github.io/SonotoneJS/)
+[a SonotoneJS API Documentation](http://oanguenot.github.io/SonotoneJS/)
 
 
 Demo
