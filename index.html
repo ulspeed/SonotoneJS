@@ -28,8 +28,12 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>What is SonotoneJS ?</h3>
+          
+<h1>Introduction</h1>
+
+
+          <h2>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>What is SonotoneJS ?</h2>
 
 <p>SonotoneJS is a JavaScript library that hides the client side WebRTC complexity in order to help you building Web Applications that use the power of WebRTC.</p>
 
@@ -40,43 +44,41 @@
 <p>SonotoneJS provides you statistics on medias used (bandwidth, quality, volume) directly usable by your Web Application.</p>
 
 
-<h3><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h3>
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h2>
 
 <p>Once downloaded the Github zip file, open it, get the Sonotone.js file and load it with your scripts.</p>
 
-<pre><code>
-&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
+<pre><code>&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
 </code></pre>
 
-<h3><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h3>
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h2>
 
 If you want to make change to SonotoneJS, you have to install Node.JS.
 
 Once installed, open a shell in your Sonotone directory and launch the following commands:
 
-<pre><code>
-$ npm install -g grunt-cli
+<pre><code>$ npm install -g grunt-cli
 $ npm install
 $ grunt
 </code></pre>
 
 <p> If you have already installed Grunt.js, you don't have to install the Grunt-Cli. Just run <code>npm install</code> and <code>grunt</code>. That's all!
 
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting using SonotoneJS</h3>
+<h2>
+<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting with SonotoneJS</h2>
 
 <p>All you have to do is to instantiate a new Sonotone Object with your user identity.
 The identity you use is sent to others peers and should be <b>unique</b>.
 </p>
 
-<pre><code>
-  var id= 'your user id';  
-  var sono = new Sonotone.IO(id);
+<pre><code>var id= 'your user id';  
+var sono = new Sonotone.IO(id);
 </code></pre>
 
 <p>
 You can now play with WebRTC.
+
+<h1>SonotoneJS API</h1>
 
 The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage:
 - <code>IO</code>: The main part that let you control your WebRTC media.
@@ -85,15 +87,18 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 - <code>Transport</code>: To define your transport layer
 </p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>IO API</h3>
+<h2>
+<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Transport API</h2>
 
-<h4>WebSocket Transport</h4>
+<p>The Transport API lets you define your transport layer depending on you already have a transport layer or not.</p>
 
-<p>Define a <b>WebSocket</b> <code>transport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+<h3>WebSocket Transport API</h3>
 
-<pre><code>
-  sono.transport('websocket', {...});
+<p>Define a <code>WebSocketTransport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+
+<h4>Methods</h4>
+
+<pre><code>sono.transport('websocket', Object);
 </code></pre>
 
 <p>You have to define the some default parameters in order to connect to your websocket server:
@@ -101,16 +106,55 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 - <code>{String} port</code>: The port number
 </p>
 
-<pre><code>
-  sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
+<pre><code>sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
 </code></pre>
 
-<h4>Remote Transport</h4>
+<p>Once the <code>WebSocketTransport</code> is define, you can connect to your server</p>
+
+<pre><code>sono.transport().connect();
+</pre></code>
+
+You can configure and connect to your server in one line of code
+<pre><code>sono.transport('websocket', Object ).connect();</code></pre>
+
+<h4>Events</h4>
+
+<p>The <code>WebSocketTransport</code> triggers the following events</p>
+
+<p>When the channel is opened</p>
+<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
+
+<p>When the channel is closed</p>
+<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
+
+<p>When there is an error on the channel</p>
+<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
+
+<p>For specific messages that are not handled by Sonotone</p>
+<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
+
+<h4>Exchange your own Messages</h4>
+
+<p>You can send your own message using the <code>WebSocketTransport</code></p>
+
+<pre><code>sono.transport().send( Object ); </code></pre>
+
+<p>Messages exchanged using the <code>WebSocketTransport</code> have the following format</p>
+
+<pre><code>{
+  caller:..., // MANDATORY: The caller ID
+  callee:..., // MANDATORY: The callee ID or 'all'
+  data: {
+    type:..., // MANDATORY: The message type
+  }
+}
+</code></pre>
+
+<h3>Remote Transport</h3>
 
 <p>Define a <b>Remote</b> <code>transport</code> if you want to use your existing signaling layer. For example, you have an <b>XMPP</b> server, you're using <b>SocketIO</b> or your are connected with an HTTP server that is able to send and receive events to others connected users (to replace the signaling layer of SonotoneJS). If you are in that case, you have to use a <b>Remote</b> <code>transport</code> in order enable SonotoneJS to communicate to your server.</p>
 
-<pre><code>
- sono.transport('websocket', {...});
+<pre><code>sono.transport('remote', {...});
 </code>/<pre>
 
 <p>You have to define two parameters in order to configure your Remote Transport:
@@ -118,8 +162,7 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 - <code>{Object} context</code>: The context for calling your function.
 </p>
 
-<pre><code>
-  sono.transport('remote', {
+<pre><code>sono.transport('remote', {
     sendCallback: myCallbackFunction,
     context: this
 });
@@ -127,16 +170,10 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 
 <p>Your callback function will be called with a <code>JSON Object</code> that has to be seen thru your signaling layer to the other peer.</p>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"><
-</span></a>Authors and Contributors</h3>
+<h3>Accessing local and remote media</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>You need to create a <code>localMedia</code> and a <code>remoteMedia</code> object in order to access to your camera, your screen or the videos that come from others peers.
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
         </section>
 
         <aside id="sidebar">
@@ -149,7 +186,7 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
             .tar.gz file
           </a>
 
-          <p class="repo-owner"><a href="https://github.com/oanguenot/SonotoneJS"></a> is maintained by <a href="https://github.com/oanguenot">oanguenot</a>.</p>
+          <p class="repo-owner"><a href="https://github.com/oanguenot/SonotoneJS"></a> is maintained by <a href="https://github.com/oanguenot">Olivier Anguenot</a>.</p>
 
           <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
         </aside>
