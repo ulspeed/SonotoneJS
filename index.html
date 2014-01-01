@@ -1,71 +1,197 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
+    <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Sonotonejs by oanguenot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+
+    <title>SonotoneJS: Ease WebRTC development</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Sonotonejs</h1>
-        <p>WebRTC JavaScript Library</p>
+    <header>
+      <div class="inner">
+        <h1>SonotoneJS</h1>
+        <h2>WebRTC JavaScript Library</h2>
+        <a href="https://github.com/oanguenot/SonotoneJS" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
 
-        <p class="view"><a href="https://github.com/oanguenot/SonotoneJS">View the Project on GitHub <small>oanguenot/SonotoneJS</small></a></p>
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          
+<h1>Introduction</h1>
 
 
-        <ul>
-          <li><a href="https://github.com/oanguenot/SonotoneJS/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/oanguenot/SonotoneJS/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/oanguenot/SonotoneJS">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+          <h2>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>What is SonotoneJS ?</h2>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p>SonotoneJS is a JavaScript library that hides the client side WebRTC complexity in order to help you building Web Applications that use the power of WebRTC.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>SonotoneJS provides you an easy way to make video or multiparty calls, screen sharing or exchanging real time data using DataChannels between your peers.</p>
+
+<p>SonotoneJS can manage the signaling part of WebRTC for you or let you define your own transport layer.</p>
+
+<p>SonotoneJS provides you statistics (bandwidth, quality, volume) directly usable by your Web Application.</p>
+
+
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h2>
+
+<p>Once downloaded the Github zip file, open it, get the Sonotone.js file and load it with your scripts.</p>
+
+<pre><code>&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h2>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+If you want to make change to SonotoneJS, you have to install Node.JS.
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+Once installed, open a shell in your Sonotone directory and launch the following commands:
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<pre><code>$ npm install -g grunt-cli
+$ npm install
+$ grunt
+</code></pre>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p> If you have already installed Grunt.js, you don't have to install the Grunt-Cli. Just run <code>npm install</code> and <code>grunt</code>. That's all!
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<h2>
+<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting with SonotoneJS</h2>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>All you have to do is to instantiate a new Sonotone Object with your user identity.
+The identity you use is sent to others peers and should be <b>unique</b>.
+</p>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<pre><code>var id = 'your user id';  
+var sono = new Sonotone.IO(id);
+</code></pre>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/oanguenot">oanguenot</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+<p>You can now play with WebRTC.</p>
+
+<h1>SonotoneJS API</h1>
+
+<p>The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage: The <code>IO</code> is the main part that let you control your WebRTC media. The <code>LocalMedia</code> manages the video from the camera or from the screen. The <code>RemoteMedia</code>deals with all your remote streams and the <code>Transport</code> allows you to define your transport layer.
+</p>
+
+<h2>
+<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Transport API</h2>
+
+<p>The Transport API lets you define your transport layer depending on you already have a transport layer or not.</p>
+
+<h3>WebSocket Transport API</h3>
+
+<p>Define a <code>WebSocketTransport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+
+<h4>Sono.transport()</h4>
+
+<pre><code>sono.transport('websocket', Object);
+</code></pre>
+
+<p>You have to define the some default parameters in order to connect to your websocket server: The <code>{String} host</code> to define your server IP address or hostname and the <code>{String} port</code> representing the port number used.
+</p>
+
+<pre><code>sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
+</code></pre>
+
+<h4>Sono.transport().connect()</h4>
+
+<p>Once the <code>WebSocketTransport</code> is define, you can connect to your server</p>
+
+<pre><code>sono.transport().connect();
+</pre></code>
+
+You can configure and connect to your server in one line of code
+<pre><code>sono.transport('websocket',  {host: '192.168.0.126', port: '1337'}).connect();</code></pre>
+
+<h4>sono.transport().send()</h4>
+
+<p>You can send your own message using the <code>WebSocketTransport</code></p>
+
+<pre><code>sono.transport().send( Object ); </code></pre>
+
+<p>Messages exchanged using the <code>WebSocketTransport</code> should have the following format</p>
+
+<pre><code>{
+  caller:..., // The caller ID (mandatory)
+  callee:..., // The callee ID or 'all' (mandatory)
+  data: {
+    type:..., // The message type (mandatory)
+  }
+}
+</code></pre>
+
+<h4>sono.transport().on()</h4>
+
+<p>The <code>WebSocketTransport</code> can trigger events that can be handled by the Web Application. All you have to do is to define your callback.</p>
+
+<p>When the channel is opened</p>
+<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
+
+<p>When the channel is closed</p>
+<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
+
+<p>When there is an error on the channel</p>
+<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
+
+<p>For specific messages that are not handled by Sonotone</p>
+<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
+
+<h3>Remote Transport</h3>
+
+<p>Define a <b>Remote</b> <code>transport</code> if you want to use your existing signaling layer. For example, you have an <b>XMPP</b> server, you're using <b>SocketIO</b> or your are connected with an HTTP server that is able to send and receive events to others connected users (to replace the signaling layer of SonotoneJS). If you are in that case, you have to use a <b>Remote</b> <code>transport</code> in order enable SonotoneJS to communicate to your server.</p>
+
+<pre><code>sono.transport('remote', {...});
+</code>/<pre>
+
+<p>You have to define two parameters in order to configure your Remote Transport:
+- <code>{Function} sendCallback</code>: The function that will be called by SonotoneJS each time SonotoneJS wants to send data to your signaling layer.
+- <code>{Object} context</code>: The context for calling your function.
+</p>
+
+<pre><code>sono.transport('remote', {
+    sendCallback: myCallbackFunction,
+    context: this
+});
+</code></pre>
+
+<p>Your callback function will be called with a <code>JSON Object</code> that has to be seen thru your signaling layer to the other peer.</p>
+
+<h3>Accessing local and remote media</h3>
+
+<p>You need to create a <code>localMedia</code> and a <code>remoteMedia</code> object in order to access to your camera, your screen or the videos that come from others peers.
+
+
+
+<pre><code>sono.localMedia()
+
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/oanguenot/SonotoneJS/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/oanguenot/SonotoneJS/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/oanguenot/SonotoneJS"></a> is maintained by <a href="https://github.com/oanguenot">Olivier Anguenot</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+  
   </body>
 </html>
