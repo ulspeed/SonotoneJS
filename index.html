@@ -130,7 +130,7 @@ You can configure and connect to your server in one line of code
 }
 </code></pre>
 
-<h4>sono.transport().on()</h4>
+<h4>sono.on()</h4>
 
 <p>The <code>WebSocketTransport</code> can trigger events that can be handled by the Web Application. All you have to do is to define your callback.</p>
 
@@ -146,11 +146,11 @@ You can configure and connect to your server in one line of code
 <p>For specific messages that are not handled by Sonotone</p>
 <pre><code>sono.on('onTransportMessage', myCallbackFunction)</code></pre>
 
-<h4>sono.transport().off()</h4>
+<h4>sono.off()</h4>
 
 <p>All subscriptions done can be removed using the <code>off()</code> method.</p>
 
-<pre><code>sono.transport.off('onTransportReady', myCallbackFunction);</code></pre>
+<pre><code>sono.off('onTransportReady', myCallbackFunction);</code></pre>
 
 <h3>Remote Transport</h3>
 
