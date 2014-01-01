@@ -18,7 +18,7 @@
   <body>
         <div class="wrapper">
       <header>
-        <h1>Sonotonejs</h1>
+        <h1>SonotoneJS</h1>
         <p>WebRTC JavaScript Library</p>
         <p class="view"><a href="https://github.com/oanguenot/SonotoneJS">View the Project on GitHub <small>oanguenot/SonotoneJS</small></a></p>
 
@@ -94,7 +94,7 @@ var sono = new Sonotone.IO(id);
 
 <h4>Sono.transport()</h4>
 
-<pre><code>sono.transport('websocket', Object);
+<pre><code>sono.transport('websocket', &lt;Object&gt;);
 </code></pre>
 
 <p>You have to define the some default parameters in order to connect to your websocket server: The <code>{String} host</code> to define your server IP address or hostname and the <code>{String} port</code> representing the port number used.
@@ -144,13 +144,19 @@ You can configure and connect to your server in one line of code
 <pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
 
 <p>For specific messages that are not handled by Sonotone</p>
-<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
+<pre><code>sono.on('onTransportMessage', myCallbackFunction)</code></pre>
+
+<h4>sono.transport().off()</h4>
+
+<p>All subscriptions done can be removed using the <code>off()</code> method.</p>
+
+<pre><code>sono.transport.off('onTransportReady', myCallbackFunction);</code></pre>
 
 <h3>Remote Transport</h3>
 
 <p>Define a <b>Remote</b> <code>transport</code> if you want to use your existing signaling layer. For example, you have an <b>XMPP</b> server, you're using <b>SocketIO</b> or your are connected with an HTTP server that is able to send and receive events to others connected users (to replace the signaling layer of SonotoneJS). If you are in that case, you have to use a <b>Remote</b> <code>transport</code> in order enable SonotoneJS to communicate to your server.</p>
 
-<pre><code>sono.transport('remote', Object);
+<pre><code>sono.transport('remote', &lt;Object&gt;);
 </code></pre>
 
 <p>You have to define two parameters in order to configure your Remote Transport. A <code>{Function} sendCallback</code> which represents the function that will be called by SonotoneJS each time SonotoneJS wants to send data to your signaling layer and the <code>{Object} context</code> for calling your function.
@@ -162,11 +168,26 @@ You can configure and connect to your server in one line of code
 });
 </code></pre>
 
-<p>Your callback function will be called with a <code>JSON Object</code> that has to be seen thru your signaling layer to the other peer.</p>
+<p>Your callback function will be called with a <code>JSON Object</code> that has to be sent thru your signaling layer to the other peer without change.</p>
 
-<h3>Accessing local and remote media</h3>
+<h4>sono.transport().send()</h4>
 
-<p>You need to create a <code>localMedia</code> and a <code>remoteMedia</code> object in order to access to your camera, your screen or the videos that come from others peers.
+<p>!!! TODO</p>
+
+<h2>Local Media API</h2>
+
+<p>You need to use the <code>localMedia</code> API in order to access to your camera, or to your screen in order to get and display the video stream.</p>
+
+<p>!!! TODO</p>
+
+<h2>Remote Media API</h2>
+
+<p>!!! TODO</p>
+
+<h2>IO API</p>
+
+<p>!!! TODO</p>
+
 
         </section>
       </div>
