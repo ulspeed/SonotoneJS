@@ -24,48 +24,11 @@ Sonotone separates the Transport/SIG from the Media/PeerConnection by providing 
 - Using an existing server that already provides a signaling
 
 
-Define a WebSocket Transport
-============================
+Documentation
+=============
 
-A WebSocket transport needs a server that handles WebSockets like Node.js
-
-To define your WebSocket transport, simply do:
-
-	var sono = new Sonotone.IO('<your_ID>');
-
-	sono.transport('websocket', {
-		host: '<your_host>',
-		port: '<your port>'
-	});
-
-Define a Remote Transport
-=========================
-
-A Remote transport should be used if you already have your own tranport layer. In that case, all you have to do is:
-
-- Define a 'sendCallback' function that will be called each time Sonotone wants to send data to your transport.
-
-- Call the 'receive' function each time you receive data from your transport in order to be handled by Sonotone:
-
-		var sono = new Sonotone.IO('<your_ID>');
-		
-		sono.transport('remote', {
-			sendCallback: <The_function_that_send_data_to_your_transport>,
-			context: this
-		});
-
-		//Each time your receive data from your transport  
-		sono.transport().receive(<your_JSON_data>);
-
-
-Build Sonotone.js library
-=========================
-
-You have to install grunt to build the Sonotone.js library
-
-	npm install -g grunt-cli	// To install the Grunt CLI
-	npm install 				// To install all others dependencies
-	grunt build 				// To build Sonotone.js
+SonotoneJS documentation API can be found here: 
+[a link](http://oanguenot.github.io/SonotoneJS/)
 
 
 Demo
@@ -255,38 +218,26 @@ Screensharing requires:
 Versions
 ========
 
+v0.4.5: Add the off() method in order to remove the events subscribed.
+v0.4.4: Fix some issues with the demo
 v0.4.3: DataChannel: Wait for ACK before sending the next part of the file
-
 v0.4.1: Use chunk of 64ko to send files
-
 v0.4.0: Introducing DataChannel
 
 v0.3.4: Fix major issues on events subscriptions. Multi-party call supported.
-
 v0.3.3: Manage multiple media streams (for conference). This first version limits to one remoteStream per peerConnection.
-
 v0.3.2: Send events to application when transport is connected, on error or closed. New event for detecting already connected peers.
-
 v0.3.1: Answer with audio/video if exists
-
 v0.3.0: Update for Firefox 24
 
 v0.2.9: Fix a lot of bugs around Firefox/Chrome interop
-
 v0.2.5: Don't add/Send ICE Candidate when peer is already connected
-
 v0.2.4: Fix RemoteTransport issue. Add new events when remote peer answers call and when call is established
-
 v0.2.3: Fire events on when browser is not compliant and when not in HTTPS (for sharing)
-
 v0.2.2: Detect when MediaStream end (Subscribe to MediaStream events)
-
 v0.2.1: Allow to change the Local Stream quality
-
 v0.2.0: Broadcast call (alpha version)
 
 v0.1.2: Add the Remote Transport
-
 v0.1.1: Add the possibility to share your screen to a remote peer (First version is limited to share your screen or share your video)
-
 v0.1.0: Full example for single audio/video call between 2 browsers (Chrome/Firefox) using a Web Socket Transport

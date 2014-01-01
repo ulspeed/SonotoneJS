@@ -13,7 +13,7 @@ module.exports = function(grunt) {
         license: grunt.file.read('LICENSE'),
 
         jshint: {
-            all: {
+            dist: {
                 options: {
                     jshintrc: '.jshintrc'
                 },
@@ -59,7 +59,7 @@ module.exports = function(grunt) {
         },
 
         usebanner: {
-            taskName: {
+            dist: {
                 options: {
                     position: 'top',
                     banner: '/* \n\n' +
@@ -80,7 +80,7 @@ module.exports = function(grunt) {
                 compress: true,
                 report: 'gzip'
             },
-            production: {
+            dist: {
                 files: {
                     'dist/sonotone-min.js': ['dist/sonotone.js']
                 }
