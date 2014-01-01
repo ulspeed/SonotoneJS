@@ -325,6 +325,18 @@ IO.prototype = {
         this._callbacks.on(eventName, callbackFunction, context);
     },
 
+    /**
+     * Unsubscribe to IO events
+     * @param {String} eventName The event to unsubscribe
+     * @param {Function} callbackFunction The registered callback
+     *
+     * @api public
+     */    
+
+    off: function(eventName, callbackFunction) {
+        this._callbacks.off(eventName, callbackFunction);
+    },
+
     setSTUNServer: function(stun) {
         Sonotone.STUN = {"iceServers": [{"url": stun}]};
     },
@@ -364,6 +376,7 @@ IO.prototype = {
 
             this._transport.on('onReady', function() {
                 Sonotone.log("SONOTONE.IO", "Transport successfully connected");
+                this._callbacks.trigger('onTransportReady', null);
             }, this);
 
             this._transport.on('onMessage', function(msg) {
@@ -409,16 +422,21 @@ IO.prototype = {
                     case 'bye':
                         this._callbacks.trigger('onCallEnded', msg.caller);
                         break;
+                    default:
+                        this._callbacks.trigger('onTransportMessage', msg);
+                        break;
                 }
 
             }, this);
 
             this._transport.on('onClose', function() {
                 Sonotone.log("SONOTONE.IO", "Transport connection closed");
+                this._callbacks.trigger('onTransportClose', null);
             }, this);  
 
             this._transport.on('onError', function(msg) {
                 Sonotone.log("SONOTONE.IO", "Transport error:" + JSON.stringify(msg));
+                this._callbacks.trigger('onTransportError', msg);
             }, this);
 
         }

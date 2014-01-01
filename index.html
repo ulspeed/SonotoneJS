@@ -50,32 +50,49 @@
 
         function initialize() {
 
+            // Define your Sonotone settings
             Sonotone.debug = true;
             Sonotone.enableSTUN = false;
 
+            // Create your Sonotone
             sono = new Sonotone.IO(new Date().getTime());
 
-            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
-            //sono.transport('websocket', {host: '172.26.165.49', port: '1337'}).connect();
-            //sono.transport('websocket', {host: 'localhost', port: '1337'}).connect();
-
+            // Listen to peers
             sono.on('onPeerConnected', onPeerConnected, this);
             sono.on('onPeerAlreadyConnected', onPeerConnected, this);
             sono.on('onPeerDisconnected', onPeerDisconnected, this);
+
+            // Listen to call
             sono.on('onCallOffered', onCallOffered, this);
             sono.on('onCallAnswered', onCallAnswered, this);
             sono.on('onCallStarted', onCallStarted, this);
             sono.on('onCallEnded', onCallEnded, this);
 
+            // Listen to transport event
+            sono.on('onTransportReady', onTransportReady, this);
+            sono.off('onTransportReady', onTransportReady);
+
+            sono.on('onTransportClose', onTransportClose, this);
+            sono.on('onTransportMessage', onTransportMessage, this);
+            sono.on('onTransportError', onTransportError, this);
+
+            // Listen to statistics
             sono.on('onPeerConnectionStats', onStats, this);
             
+            // Listen to local Media
             sono.localMedia().on('onLocalVideoStreamStarted', onLocalStreamStarted, this);
             sono.localMedia().on('onLocalScreenStreamStarted', onLocalScreenStreamStarted, this);
             sono.localMedia().on('onLocalVideoStreamEnded', onLocalStreamEnded, this);
             sono.localMedia().on('onLocalScreenStreamEnded', onLocalScreenStreamEnded, this);
+
+            // Listen to remote media
             sono.localMedia().on('onLocalVideoStreamError', onLocalStreamError, this);
             sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
             sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
+
+            // Define your transport layer (WebSocket)
+            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
+
         };
 
         function startVideo() {
@@ -91,6 +108,22 @@
 
         function stopVideo() {
             sono.releaseCall();
+        };
+
+        function onTransportReady() {
+            console.log("Transport ready");
+        };
+
+        function onTransportClose() {
+            console.log("Transport closed");
+        };
+
+        function onTransportMessage(msg) {
+            console.log("Transport message", msg);
+        };
+
+        function onTransportError(msg) {
+            console.log("Transport error", msg);
         };
 
         function onPeerConnected(user) {

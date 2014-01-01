@@ -25,9 +25,40 @@ Events.prototype = {
         if(!this._events) {
             this._events = {};
         }
+        
         var events = this._events[name] || (this._events[name] = []);
+        
         events.push({callback: callback, ctx: context || this});
+        
         return this;
+    },
+
+    /**
+     * Unsubscribe to an event
+     * @param {String} name The event to subscribe
+     * @param {Function} callbackFunction The function to call
+     *
+     * @api public
+     */
+
+    off: function(name, callback) {
+        if(this._events) {
+            var events = this._events[name];
+            if(events) {
+
+                var index = -1;
+
+                for (var i = 0, l = events.length; i < l; i++) {
+                    if(callback === events[i].callback) {
+                        index = i;
+                    }
+                }
+
+                if(index > -1) {
+                    events.splice(index, 1);
+                }
+            }
+        }
     },
 
     /**

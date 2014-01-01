@@ -127,6 +127,18 @@ WebSocketTransport.prototype = {
 
     on: function(eventName, callbackFunction, context) {
         this._callbacks.on(eventName, callbackFunction, context);
-    }
+    },
+
+    /**
+     * Unsubscribe to IO events
+     * @param {String} eventName The event to unsubscribe
+     * @param {Function} callbackFunction The registered callback
+     *
+     * @api public
+     */    
+
+    off: function(eventName, callbackFunction) {
+        this._callbacks.off(eventName, callbackFunction);
+    },
 
 };

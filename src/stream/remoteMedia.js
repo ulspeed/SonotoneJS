@@ -56,6 +56,18 @@ RemoteMedia.prototype = {
     },
 
     /**
+     * Unsubscribe to IO events
+     * @param {String} eventName The event to unsubscribe
+     * @param {Function} callbackFunction The registered callback
+     *
+     * @api public
+     */    
+
+    off: function(eventName, callbackFunction) {
+        this._callbacks.off(eventName, callbackFunction);
+    },
+
+    /**
      * Attach the RemoteStream to a <video> or <canvas> element
      *
      * @api public
