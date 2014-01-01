@@ -41,7 +41,7 @@
 
 <p>SonotoneJS can manage the signaling part of WebRTC for you or let you define your own transport layer.</p>
 
-<p>SonotoneJS provides you statistics on medias used (bandwidth, quality, volume) directly usable by your Web Application.</p>
+<p>SonotoneJS provides you statistics (bandwidth, quality, volume) directly usable by your Web Application.</p>
 
 
 <h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h2>
@@ -71,20 +71,15 @@ $ grunt
 The identity you use is sent to others peers and should be <b>unique</b>.
 </p>
 
-<pre><code>var id= 'your user id';  
+<pre><code>var id = 'your user id';  
 var sono = new Sonotone.IO(id);
 </code></pre>
 
-<p>
-You can now play with WebRTC.
+<p>You can now play with WebRTC.</p>
 
 <h1>SonotoneJS API</h1>
 
-The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage:
-- <code>IO</code>: The main part that let you control your WebRTC media.
-- <code>LocalMedia</code>: To be able to acquire the video from the camera or from the screen.
-- <code>RemoteMedia</code>: To deal with all remote streams
-- <code>Transport</code>: To define your transport layer
+<p>The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage: The <code>IO</code> is the main part that let you control your WebRTC media. The <code>LocalMedia</code> manages the video from the camera or from the screen. The <code>RemoteMedia</code>deals with all your remote streams and the <code>Transport</code> allows you to define your transport layer.
 </p>
 
 <h2>
@@ -96,18 +91,18 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 
 <p>Define a <code>WebSocketTransport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
 
-<h4>Methods</h4>
+<h4>Sono.transport()</h4>
 
 <pre><code>sono.transport('websocket', Object);
 </code></pre>
 
-<p>You have to define the some default parameters in order to connect to your websocket server:
-- <code>{String} host</code>: IP address or hostname of your server
-- <code>{String} port</code>: The port number
+<p>You have to define the some default parameters in order to connect to your websocket server: The <code>{String} host</code> to define your server IP address or hostname and the <code>{String} port</code> representing the port number used.
 </p>
 
 <pre><code>sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
 </code></pre>
+
+<h4>Sono.transport().connect()</h4>
 
 <p>Once the <code>WebSocketTransport</code> is define, you can connect to your server</p>
 
@@ -115,25 +110,9 @@ The SonotoneJS library is splitted into several parts. Each part is dedicated to
 </pre></code>
 
 You can configure and connect to your server in one line of code
-<pre><code>sono.transport('websocket', Object ).connect();</code></pre>
+<pre><code>sono.transport('websocket',  {host: '192.168.0.126', port: '1337'}).connect();</code></pre>
 
-<h4>Events</h4>
-
-<p>The <code>WebSocketTransport</code> triggers the following events</p>
-
-<p>When the channel is opened</p>
-<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
-
-<p>When the channel is closed</p>
-<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
-
-<p>When there is an error on the channel</p>
-<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
-
-<p>For specific messages that are not handled by Sonotone</p>
-<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
-
-<h4>Exchange your own Messages</h4>
+<h4>sono.transport().send()</h4>
 
 <p>You can send your own message using the <code>WebSocketTransport</code></p>
 
@@ -149,6 +128,22 @@ You can configure and connect to your server in one line of code
   }
 }
 </code></pre>
+
+<h4>sono.transport().on()</h4>
+
+<p>The <code>WebSocketTransport</code> can trigger events that can be handled by the Web Application. All you have to do is to define your callback.</p>
+
+<p>When the channel is opened</p>
+<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
+
+<p>When the channel is closed</p>
+<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
+
+<p>When there is an error on the channel</p>
+<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
+
+<p>For specific messages that are not handled by Sonotone</p>
+<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
 
 <h3>Remote Transport</h3>
 
@@ -173,6 +168,10 @@ You can configure and connect to your server in one line of code
 <h3>Accessing local and remote media</h3>
 
 <p>You need to create a <code>localMedia</code> and a <code>remoteMedia</code> object in order to access to your camera, your screen or the videos that come from others peers.
+
+
+
+<pre><code>sono.localMedia()
 
         </section>
 
