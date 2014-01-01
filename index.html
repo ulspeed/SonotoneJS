@@ -31,18 +31,21 @@
           <h3>
 <a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>What is SonotoneJS ?</h3>
 
-<p>SonotoneJS is a JavaScript library that hides the client side WebRTC complexity in order to help you building Web Applications that use power of WebRTC</p>
+<p>SonotoneJS is a JavaScript library that hides the client side WebRTC complexity in order to help you building Web Applications that use the power of WebRTC.</p>
 
 <p>SonotoneJS provides you an easy way to make video or multiparty calls, screen sharing or exchanging real time data using DataChannels between your peers.</p>
+
+<p>SonotoneJS can manage the signaling part of WebRTC for you or let you define your own transport layer.</p>
+
+<p>SonotoneJS provides you statistics on medias used (bandwidth, quality, volume) directly usable by your Web Application.</p>
 
 
 <h3><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h3>
 
-<p>Once downloaded the Github zip file, open it an get the Sonotone.js file.</p>
+<p>Once downloaded the Github zip file, open it, get the Sonotone.js file and load it with your scripts.</p>
 
 <pre><code>
-    // Load the SonotoneJS library
-    &lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
 </code></pre>
 
 <h3><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h3>
@@ -52,27 +55,81 @@ If you want to make change to SonotoneJS, you have to install Node.JS.
 Once installed, open a shell in your Sonotone directory and launch the following commands:
 
 <pre><code>
-    // Install the Grunt Command line
-    $ npm install -g grunt-cli
-    // Install all other Grunt plugins
-    $ npm install
-    // Build a new version of SonotoneJS each time a file has been modified
-    $ grunt
+$ npm install -g grunt-cli
+$ npm install
+$ grunt
 </code></pre>
 
+<p> If you have already installed Grunt.js, you don't have to install the Grunt-Cli. Just run <code>npm install</code> and <code>grunt</code>. That's all!
+
 
 <h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting using SonotoneJS</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>All you have to do is to instantiate a new Sonotone Object with your user identity.
+The identity you use is sent to others peers and should be <b>unique</b>.
+</p>
+
+<pre><code>
+  var id= 'your user id';  
+  var sono = new Sonotone.IO(id);
+</code></pre>
+
+<p>
+You can now play with WebRTC.
+
+The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage:
+- <code>IO</code>: The main part that let you control your WebRTC media.
+- <code>LocalMedia</code>: To be able to acquire the video from the camera or from the screen.
+- <code>RemoteMedia</code>: To deal with all remote streams
+- <code>Transport</code>: To define your transport layer
+</p>
 
 <h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>IO API</h3>
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<h4>WebSocket Transport</h4>
+
+<p>Define a <b>WebSocket</b> <code>transport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+
+<pre><code>
+  sono.transport('websocket', {...});
+</code></pre>
+
+<p>You have to define the some default parameters in order to connect to your websocket server:
+- <code>{String} host</code>: IP address or hostname of your server
+- <code>{String} port</code>: The port number
+</p>
+
+<pre><code>
+  sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
+</code></pre>
+
+<h4>Remote Transport</h4>
+
+<p>Define a <b>Remote</b> <code>transport</code> if you want to use your existing signaling layer. For example, you have an <b>XMPP</b> server, you're using <b>SocketIO</b> or your are connected with an HTTP server that is able to send and receive events to others connected users (to replace the signaling layer of SonotoneJS). If you are in that case, you have to use a <b>Remote</b> <code>transport</code> in order enable SonotoneJS to communicate to your server.</p>
+
+<pre><code>
+ sono.transport('websocket', {...});
+</code>/<pre>
+
+<p>You have to define two parameters in order to configure your Remote Transport:
+- <code>{Function} sendCallback</code>: The function that will be called by SonotoneJS each time SonotoneJS wants to send data to your signaling layer.
+- <code>{Object} context</code>: The context for calling your function.
+</p>
+
+<pre><code>
+  sono.transport('remote', {
+    sendCallback: myCallbackFunction,
+    context: this
+});
+</code></pre>
+
+<p>Your callback function will be called with a <code>JSON Object</code> that has to be seen thru your signaling layer to the other peer.</p>
 
 <h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"><
+</span></a>Authors and Contributors</h3>
 
 <p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
 
