@@ -29,7 +29,8 @@
         </ul>
       </header>
       <section>
-          
+  
+
 <h1>Introduction</h1>
 
 
@@ -52,6 +53,7 @@
 <pre><code>&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
 </code></pre>
 
+
 <h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h2>
 
 If you want to make change to SonotoneJS, you have to install Node.JS.
@@ -64,6 +66,7 @@ $ grunt
 </code></pre>
 
 <p> If you have already installed Grunt.js, you don't have to install the Grunt-Cli. Just run <code>npm install</code> and <code>grunt</code>. That's all!
+
 
 <h2>
 <a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting with SonotoneJS</h2>
@@ -78,19 +81,23 @@ var sono = new Sonotone.IO(id);
 
 <p>You can now play with WebRTC.</p>
 
+
 <h1>SonotoneJS API</h1>
 
 <p>The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage: The <code>IO</code> is the main part that let you control your WebRTC media. The <code>LocalMedia</code> manages the video from the camera or from the screen. The <code>RemoteMedia</code>deals with all your remote streams and the <code>Transport</code> allows you to define your transport layer.
 </p>
+
 
 <h2>
 <a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Transport API</h2>
 
 <p>The Transport API lets you define your transport layer depending on you already have a transport layer or not.</p>
 
+
 <h3>WebSocket Transport API</h3>
 
 <p>Define a <code>WebSocketTransport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+
 
 <h4>Sono.transport()</h4>
 
@@ -103,6 +110,7 @@ var sono = new Sonotone.IO(id);
 <pre><code>sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
 </code></pre>
 
+
 <h4>Sono.transport().connect()</h4>
 
 <p>Once the <code>WebSocketTransport</code> is define, you can connect to your server</p>
@@ -112,6 +120,7 @@ var sono = new Sonotone.IO(id);
 
 You can configure and connect to your server in one line of code
 <pre><code>sono.transport('websocket',  {host: '192.168.0.126', port: '1337'}).connect();</code></pre>
+
 
 <h4>sono.transport().send()</h4>
 
@@ -130,27 +139,30 @@ You can configure and connect to your server in one line of code
 }
 </code></pre>
 
+
 <h4>sono.on()</h4>
 
 <p>The <code>WebSocketTransport</code> can trigger events that can be handled by the Web Application. All you have to do is to define your callback.</p>
 
 <p>When the channel is opened</p>
-<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
+<pre><code>sono.on('onTransportReady', myCallbackFunction, context)</code></pre>
 
 <p>When the channel is closed</p>
-<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
+<pre><code>sono.on('onTransportClose', myCallbackFunction, context)</code></pre>
 
 <p>When there is an error on the channel</p>
-<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
+<pre><code>sono.on('onTransportError', myCallbackFunction, context)</code></pre>
 
 <p>For specific messages that are not handled by Sonotone</p>
-<pre><code>sono.on('onTransportMessage', myCallbackFunction)</code></pre>
+<pre><code>sono.on('onTransportMessage', myCallbackFunction, context)</code></pre>
+
 
 <h4>sono.off()</h4>
 
 <p>All subscriptions done can be removed using the <code>off()</code> method.</p>
 
 <pre><code>sono.off('onTransportReady', myCallbackFunction);</code></pre>
+
 
 <h3>Remote Transport</h3>
 
@@ -170,13 +182,142 @@ You can configure and connect to your server in one line of code
 
 <p>Your callback function will be called with a <code>JSON Object</code> that has to be sent thru your signaling layer to the other peer without change.</p>
 
+
 <h4>sono.transport().send()</h4>
 
 <p>!!! TODO</p>
 
+
 <h2>Local Media API</h2>
 
 <p>You need to use the <code>localMedia</code> API in order to access to your camera, or to your screen in order to get and display the video stream.</p>
+
+
+<h3>sono.localMedia()</h3>
+
+<p>The following method give you access to the <code>localMedia</code></p>
+
+<p>The <code>localMedia</code> give you access to your local streams (camera or screen).</p>
+
+<pre><code>var local = sono.localMedia();</code></pre>
+
+
+<h3>sono.localMedia().on()</h3>
+
+<p>Before requesting for your camera or your screen, you have to register for some event that will inform you of the status of your request</p>
+
+
+<h4>When the camera stream is captured</h4>
+
+<pre><code>sono.localMedia().on('onLocalVideoStreamStarted', myCallback, context)</code></pre>
+
+<p>You will receive the stream in the callback. See the <code>sono.localMedia().renderVideoStream()</code> to know how to display your stream.</p>
+
+
+<h4>When the camera stream is ended</h4>
+
+<pre><code>sono.localMedia().on('onLocalVideoStreamEnded', myCallback, context)</code></pre>
+
+<p>You will receive when you call the <code>sono.localMedia().releaseVideo()</code> method.</p>
+
+
+<h4>When there is a problem capturing the camera stream</h4>
+
+<pre><code>sono.localMedia().on('onLocalVideoStreamError', myCallback, context)</code></pre>
+
+<p>You will receive a JSON object that describes the reason of the failure ('Permission denied', 'Browser not compliant').</p>
+
+
+<h4>When the screen stream is captured</h4>
+
+<pre><code>sono.localMedia().on('onLocalScreenStreamStarted', myCallback, context)</code></pre>
+
+<p>You will receive the stream in the callback. See the <code>sono.localMedia().renderScreenVideoStream()</code> method to know how to display your stream.</p>
+
+
+<h4>When the screen stream is ended</h4>
+
+<pre><code>sono.localMedia().on('onLocalVideoStreamEnded', myCallback, context)</code></pre>
+
+<p>You will receive when you call the <code>sono.localMedia().releaseVideo()</code> method.</p>
+
+
+<h4>When there is an error capturing the screen stream</h4>
+
+<pre><code>sono.localMedia().on('onLocalScreenStreamError', myCallback, context)</code></pre>
+
+<p>You will receive a JSON object that describes the reason of the failure ('Permission denied', 'browser not compliang', 'HTTP required').</p>
+
+
+<h3>sono.localMedia().off()</h3>
+
+<p>All subscriptions to events can be removed by called the <code>off()</code> method.</p>
+
+<pre><code>sono.localMedia().off('onLocalVideoStreamStarted', myCallback)</code></pre>
+
+
+<h3>sono.localMedia().acquire()</h3>
+
+<p>Once you have intialized the <code>localMedia</code>, you can access to your camera</p>
+
+<pre><code>var local = sono.localMedia();
+  local.acquire( &lt;Object&gt; );
+</code></pre>
+
+<p>You have to pass a JSON object that represents the constraints you want on your stream: <code>{Boolean} audio</code> to request or not the microphone,<code>{Boolean} video</code> to request or not the video and <code>{String} format</code> to specify the video constraint: <code>qvga</code>, <code>qvga_16:9</code>, <code>vga</code>, <code>vga_16:9</code>, <code>cam</code> or <code>hd</code></p>
+
+<pre><code>sono.localMedia().acquire({
+  video: true,
+  audio: true,
+  format: 'cam'
+});
+</code></pre>
+
+
+<h3>sono.localMedia().aquireScreen()</h3>
+
+<p>With this method, you can request to get the stream of your screen. If you have two screens, both will be shared. Sharing the screen is only available in Chrome for Desktop.</p>
+
+<pre><code>sono.localMedia().acquireScreen( &lt;Object&gt; )</code></pre>
+
+<p>You have to pass a JSON object that represents the size of the video <code>{int} width</code> and <code>{int} height</code>.
+
+<pre><code>sono.localMedia().aquireScreen({
+  width:1024,
+  height:768
+});</code></pre>
+
+
+<h3>sono.localMedia().renderVideoSteam()</h3>
+
+<p>This method displays the camera stream into an existing &lt;video&gt; tag. You can display or not your stream using this method.</p>
+
+<pre><code>sono.localMedia().renderVideoStream( &lt;HTMLMediaElement&gt; );</code></pre>
+
+<p>The argument is a reference to an existing &lt;video&gt; tag element.</p>
+
+
+<h3>sono.localMedia().renderScreenSteam()</h3>
+
+<p>This method displays the screen stream into an existing &lt;video&gt; tag. You can display or not your stream using this method.</p>
+
+<pre><code>sono.localMedia().renderScreenStream( &lt;HTMLMediaElement&gt; );</code></pre>
+
+<p>The argument is a reference to an existing &lt;video&gt; tag element.</p>
+
+
+<h3>sono.localMedia().releaseVideo()</h3>
+
+<p>This method stops the capture of the camera stream and generates a <code>'onLocalVideoStreamEnded'</code></p>
+
+<pre><code>sono.localMedia().releaseVideo();</code></pre>
+
+
+<h3>sono.localMedia().releaseScreen()</h3>
+
+<p>This method stops the capture of the screen stream and generates a <code>'onLocalScreenStreamEnded'</code></p>
+
+<pre><code>sono.localMedia().releaseScreen();</code></pre>
 
 <p>!!! TODO</p>
 
