@@ -288,7 +288,7 @@ You can configure and connect to your server in one line of code
 });</code></pre>
 
 
-<h3>sono.localMedia().renderVideoSteam()</h3>
+<h3>sono.localMedia().renderVideoStream()</h3>
 
 <p>This method displays the camera stream into an existing &lt;video&gt; tag. You can display or not your stream using this method.</p>
 
@@ -297,7 +297,7 @@ You can configure and connect to your server in one line of code
 <p>The argument is a reference to an existing &lt;video&gt; tag element.</p>
 
 
-<h3>sono.localMedia().renderScreenSteam()</h3>
+<h3>sono.localMedia().renderScreenStream()</h3>
 
 <p>This method displays the screen stream into an existing &lt;video&gt; tag. You can display or not your stream using this method.</p>
 
@@ -318,6 +318,35 @@ You can configure and connect to your server in one line of code
 <p>This method stops the capture of the screen stream and generates a <code>'onLocalScreenStreamEnded'</code></p>
 
 <pre><code>sono.localMedia().releaseScreen();</code></pre>
+
+
+<h3>sono.localMedia().streamVideo()</h3>
+
+<p>This method returns the video stream captured from the camera</p>
+
+<pre><code>var video = sono.localMedia().streamVideo();</code></pre>
+
+
+<h3>sono.localMedia().streamScreen()</h3>
+
+<p>This method returns the video stream captured from the screen</p>
+
+<pre><code>var screen = sono.localMedia().streamScreen();</code></pre>
+
+
+<h3>sono.localMedia().isCameraCaptured()</h3>
+
+<p>This method returns true if the video of the camera has been captured</p>
+
+<pre><code>var isVideoCaptured = sono.localMedia().isCameraCaptured();</code></pre>
+
+
+<h3>sono.localMedia().isScreenCaptured()</h3>
+
+<p>This method returns true if the video of the screen has been captured</p>
+
+<pre><code>var isScreenCaptured = sono.localMedia().isScreenCaptured();</code></pre>
+
 
 <p>!!! TODO</p>
 
