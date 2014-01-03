@@ -4,7 +4,7 @@
  * @namespace
  */
 
-var LocalMedia = Sonotone.IO.LocalMedia = function(caps) {
+var LocalMedia = Sonotone.IO.LocalMedia = function(caps, adapter) {
     Sonotone.log("LOCALMEDIA", "LocalMedia initialized");
 
     this._requestUserMediaPending = false;
@@ -17,6 +17,8 @@ var LocalMedia = Sonotone.IO.LocalMedia = function(caps) {
     this._isCameraCaptured = false;
 
     this._caps = caps;
+
+    this._adapter = adapter;
 };
 
 /**
@@ -140,19 +142,20 @@ LocalMedia.prototype = {
 
             this._requestUserMediaPending = true;
 
-            Sonotone.getUserMedia(mediaConstraints, function(_stream) {
+            this._adapter.getUserMedia(mediaConstraints, function(_stream) {
                 Sonotone.log("LOCALMEDIA", "User has granted access to local media - Camera");              
                 that._streamVideo = _stream;
                 that._requestUserMediaPending = false;
                 that._subscribeToStreamEvent(that._streamVideo);
                 that._isCameraCaptured = true;
+                console.log("stream", that._streamVideo);
                 that._callbacks.trigger('onLocalVideoStreamStarted', that._streamVideo);
             }, function(_error) {
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media", _error);   
                 that._requestUserMediaPending = false;
                 that._isCameraCaptured = false;
                 that._callbacks.trigger('onLocalVideoStreamError', {code: 1, message:"", name: "PERMISSION_DENIED"});
-            });
+            }, this);
         }  
         else {
             if(!this._caps.canDoAudioVideoCall) {
@@ -293,6 +296,16 @@ LocalMedia.prototype = {
     },
 
     /**
+     * Trigger event
+     * For testing purpose
+     *
+     * @api public
+     */
+    trigger: function(eventName, args) {
+        this._callbacks.trigger(name, args);
+    },
+
+    /**
      * Attach the Local video stream to a <video> or <canvas> element
      *
      * @api public
@@ -300,7 +313,8 @@ LocalMedia.prototype = {
 
     renderVideoStream: function(HTMLMediaElement) {
         Sonotone.log("LOCALMEDIA", "Render the local stream - Video"); 
-        Sonotone.attachToMedia(HTMLMediaElement, this._streamVideo);
+        //Sonotone.attachToMedia(HTMLMediaElement, this._streamVideo);
+        this._adapter.attachToMedia(HTMLMediaElement, this._streamVideo);
     },
 
      /**
@@ -352,6 +366,18 @@ LocalMedia.prototype = {
 
     isCameraCaptured: function() {
         return this._isCameraCaptured;
+    },
+
+
+    /**
+     * Get or set the capabilities
+     * For testing purpose
+     */
+    caps: function(caps) {
+        if(caps) {
+            this._caps = caps;
+        }
+        return this._caps;
     },
 
     /**

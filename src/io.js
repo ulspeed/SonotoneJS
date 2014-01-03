@@ -35,12 +35,19 @@ var IO = Sonotone.IO = function(id) {
     this._capabilities = new Sonotone.IO.Capabilities();
 
     /**
+     * Adapter
+     *
+     * @api private
+     */
+     this._adapter = new Sonotone.IO.Adapter();
+
+    /**
      * Local stream
      *
      * @api private
      */
 
-    this._localMedia = new Sonotone.IO.LocalMedia(this.caps());
+    this._localMedia = new Sonotone.IO.LocalMedia(this.caps(), this._adapter);
 
     /**
      * Remote stream
@@ -49,6 +56,13 @@ var IO = Sonotone.IO = function(id) {
      */
 
     this._remoteMedia = new Sonotone.IO.RemoteMedia();
+
+    /**
+     * Adapter
+     *
+     * @api private
+     */
+     this._adapter = new Sonotone.IO.Adapter();
 
     /**
      * List of created Peerconnections

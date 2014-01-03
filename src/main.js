@@ -87,6 +87,8 @@ Sonotone.log = function(cat, msg, arg) {
  * Firefox 22+
  */
 
+/*
+
 Sonotone.adapter = function() {
 
     if(navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
@@ -141,6 +143,8 @@ Sonotone.adapter = function() {
     }
 };
 
+*/
+
 /**
 * Merge media constraints
 *
@@ -155,6 +159,3 @@ Sonotone.mergeConstraints = function(cons1, cons2) {
     merged.optional.concat(cons2.optional);
     return merged;
 };
-
-// Call the adapter
-Sonotone.adapter();

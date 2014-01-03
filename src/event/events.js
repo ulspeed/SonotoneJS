@@ -1,7 +1,3 @@
-var Sonotone = Sonotone ? Sonotone : {};
-Sonotone.IO = (Sonotone.IO) ? (Sonotone.IO) : {};
-
-
 /**
  * Manage Events subscriptions and firings
  */
@@ -74,13 +70,10 @@ Events.prototype = {
      */
      
     trigger: function(name, args) {
-        console.log("trigger");
         if (!this._events) {
             return this;
         }
         var events = this._events[name];
-
-        console.log(events);
 
         if (events) {
             for (var i=0;i<events.length;i++) {
