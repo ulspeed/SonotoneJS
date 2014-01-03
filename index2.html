@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>SonotoneJS: Ease Your WebRTC Development</title>
+  </head>
+
+  <body>
+        <div class="wrapper">
+      <header>
+        <h1>Sonotonejs</h1>
+        <p>WebRTC JavaScript Library</p>
+        <p class="view"><a href="https://github.com/oanguenot/SonotoneJS">View the Project on GitHub <small>oanguenot/SonotoneJS</small></a></p>
+
+        <ul>
+          <li><a href="https://github.com/oanguenot/SonotoneJS/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/oanguenot/SonotoneJS/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/oanguenot/SonotoneJS">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+          
+<h1>Introduction</h1>
+
+
+          <h2>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>What is SonotoneJS ?</h2>
+
+<p>SonotoneJS is a JavaScript library that hides the client side WebRTC complexity in order to help you building Web Applications that use the power of WebRTC.</p>
+
+<p>SonotoneJS provides you an easy way to make video or multiparty calls, screen sharing or exchanging real time data using DataChannels between your peers.</p>
+
+<p>SonotoneJS can manage the signaling part of WebRTC for you or let you define your own transport layer.</p>
+
+<p>SonotoneJS provides you statistics (bandwidth, quality, volume) directly usable by your Web Application.</p>
+
+
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to use SonotoneJS ?</h2>
+
+<p>Once downloaded the Github zip file, open it, get the Sonotone.js file and load it with your scripts.</p>
+
+<pre><code>&lt;script type="text/javascript" src="sonotone.js"&gt;&lt;/script&gt;
+</code></pre>
+
+<h2><a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>How to build SonotoneJS ?</h2>
+
+If you want to make change to SonotoneJS, you have to install Node.JS.
+
+Once installed, open a shell in your Sonotone directory and launch the following commands:
+
+<pre><code>$ npm install -g grunt-cli
+$ npm install
+$ grunt
+</code></pre>
+
+<p> If you have already installed Grunt.js, you don't have to install the Grunt-Cli. Just run <code>npm install</code> and <code>grunt</code>. That's all!
+
+<h2>
+<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Starting with SonotoneJS</h2>
+
+<p>All you have to do is to instantiate a new Sonotone Object with your user identity.
+The identity you use is sent to others peers and should be <b>unique</b>.
+</p>
+
+<pre><code>var id = 'your user id';  
+var sono = new Sonotone.IO(id);
+</code></pre>
+
+<p>You can now play with WebRTC.</p>
+
+<h1>SonotoneJS API</h1>
+
+<p>The SonotoneJS library is splitted into several parts. Each part is dedicated to a specific usage: The <code>IO</code> is the main part that let you control your WebRTC media. The <code>LocalMedia</code> manages the video from the camera or from the screen. The <code>RemoteMedia</code>deals with all your remote streams and the <code>Transport</code> allows you to define your transport layer.
+</p>
+
+<h2>
+<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Transport API</h2>
+
+<p>The Transport API lets you define your transport layer depending on you already have a transport layer or not.</p>
+
+<h3>WebSocket Transport API</h3>
+
+<p>Define a <code>WebSocketTransport</code> that lets you connect to your Node.js server using Websocket or to the demo server provided here.</p>
+
+<h4>Sono.transport()</h4>
+
+<pre><code>sono.transport('websocket', Object);
+</code></pre>
+
+<p>You have to define the some default parameters in order to connect to your websocket server: The <code>{String} host</code> to define your server IP address or hostname and the <code>{String} port</code> representing the port number used.
+</p>
+
+<pre><code>sono.transport('websocket', {host: '192.168.0.126', port: '1337'});
+</code></pre>
+
+<h4>Sono.transport().connect()</h4>
+
+<p>Once the <code>WebSocketTransport</code> is define, you can connect to your server</p>
+
+<pre><code>sono.transport().connect();
+</pre></code>
+
+You can configure and connect to your server in one line of code
+<pre><code>sono.transport('websocket',  {host: '192.168.0.126', port: '1337'}).connect();</code></pre>
+
+<h4>sono.transport().send()</h4>
+
+<p>You can send your own message using the <code>WebSocketTransport</code></p>
+
+<pre><code>sono.transport().send( Object ); </code></pre>
+
+<p>Messages exchanged using the <code>WebSocketTransport</code> should have the following format</p>
+
+<pre><code>{
+  caller:..., // The caller ID (mandatory)
+  callee:..., // The callee ID or 'all' (mandatory)
+  data: {
+    type:..., // The message type (mandatory)
+  }
+}
+</code></pre>
+
+<h4>sono.transport().on()</h4>
+
+<p>The <code>WebSocketTransport</code> can trigger events that can be handled by the Web Application. All you have to do is to define your callback.</p>
+
+<p>When the channel is opened</p>
+<pre><code>sono.on('onTransportReady', myCallbackFunction)</code></pre>
+
+<p>When the channel is closed</p>
+<pre><code>sono.on('onTransportClose', myCallbackFunction)</code></pre>
+
+<p>When there is an error on the channel</p>
+<pre><code>sono.on('onTransportError', myCallbackFunction)</code></pre>
+
+<p>For specific messages that are not handled by Sonotone</p>
+<pre><code>sono.on('onMessage', myCallbackFunction)</code></pre>
+
+<h3>Remote Transport</h3>
+
+<p>Define a <b>Remote</b> <code>transport</code> if you want to use your existing signaling layer. For example, you have an <b>XMPP</b> server, you're using <b>SocketIO</b> or your are connected with an HTTP server that is able to send and receive events to others connected users (to replace the signaling layer of SonotoneJS). If you are in that case, you have to use a <b>Remote</b> <code>transport</code> in order enable SonotoneJS to communicate to your server.</p>
+
+<pre><code>sono.transport('remote', Object);
+</code></pre>
+
+<p>You have to define two parameters in order to configure your Remote Transport. A <code>{Function} sendCallback</code> which represents the function that will be called by SonotoneJS each time SonotoneJS wants to send data to your signaling layer and the <code>{Object} context</code> for calling your function.
+</p>
+
+<pre><code>sono.transport('remote', {
+    sendCallback: myCallbackFunction,
+    context: this
+});
+</code></pre>
+
+<p>Your callback function will be called with a <code>JSON Object</code> that has to be seen thru your signaling layer to the other peer.</p>
+
+<h3>Accessing local and remote media</h3>
+
+<p>You need to create a <code>localMedia</code> and a <code>remoteMedia</code> object in order to access to your camera, your screen or the videos that come from others peers.
+
+        </section>
+      </div>
+    </div>
+
+  <script src="javascripts/scale.fix.js"></script>
+  </body>
+</html>

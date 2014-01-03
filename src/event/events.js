@@ -74,10 +74,13 @@ Events.prototype = {
      */
      
     trigger: function(name, args) {
+        console.log("trigger");
         if (!this._events) {
             return this;
         }
         var events = this._events[name];
+
+        console.log(events);
 
         if (events) {
             for (var i=0;i<events.length;i++) {
