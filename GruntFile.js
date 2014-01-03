@@ -54,7 +54,11 @@ module.exports = function(grunt) {
         watch: {
             src: {
                 files: 'src/**/*.js',
-                tasks: ['jshint', 'concat', 'uglify', 'usebanner']
+                tasks: ['jshint', 'concat', 'uglify', 'usebanner', 'test']
+            },
+            test: {
+                files: 'test/**/*.js',
+                tasks: ['test']
             }
         },
 
@@ -85,7 +89,11 @@ module.exports = function(grunt) {
                     'dist/sonotone-min.js': ['dist/sonotone.js']
                 }
             }
-         }
+        },
+
+        qunit: {
+            all: ['test/**/*.html']
+        }
 
 
     });
@@ -99,6 +107,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-notify');             // Notify 
     grunt.loadNpmTasks('grunt-banner');             // License
     grunt.loadNpmTasks('grunt-contrib-uglify');     // Code source uglification
+    grunt.loadNpmTasks('grunt-contrib-qunit');      // For Qunit/SinonJS tests
 
     //### Main Tasks
     //Execute <code>grunt</code> to launch the default task: <code>watch</code>
@@ -106,5 +115,7 @@ module.exports = function(grunt) {
 
     //Execute all tasks for building the Sonotone.js library
     grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'usebanner']);
+
+    grunt.registerTask('test', ['qunit']);
 
  };
