@@ -99,6 +99,8 @@
 
         };
 
+/* --------------- Features ---------------- */
+
         function startVideo() {
 
             var constraints = {
@@ -113,6 +115,75 @@
         function stopVideo() {
             sono.releaseCall();
         };
+
+        function callVideo() {
+          var id = users[0].id;
+            sono.call(id, 'video', false);
+        };
+
+        function addVideoToCall() {
+          var id = users[0].id;
+          sono.addVideoToCall(id);
+        }
+
+        function removeVideoToCall() {
+         var id = users[0].id;
+          sono.removeVideoFromCall(id); 
+        }
+
+        function callScreen() {
+          var id = users[0].id;
+            sono.call(id, 'screen', false);
+        }
+
+        function call2() {
+            sono.call(users[1].id);
+        };
+
+        function call3() {
+            sono.call(users[2].id);
+        };
+
+        function broadcast() {
+            sono.broadcastCall(users);
+        };
+
+        function sendAMessage() {
+            sono.sendMessage(
+                {
+                    data: {
+                        msg: new Date().getTime().toString(), 
+                        type: 'data'
+                    }, 
+                    recipient: 'all'
+                }
+            );
+        };
+
+        function share() {
+            
+            sono.localMedia().acquireScreen();
+        };
+
+        function stats() {
+            sono.setStats();
+        };
+
+        function stopStats() {
+            sono.stopStats();
+        };
+
+        function mute() {
+            document.getElementById('localVideo').setAttribute('muted', 'muted');
+            sono.mute(users[0].id, true, true);
+        };
+
+        function unmute() {
+            document.getElementById('localVideo').removeAttribute('muted');
+            sono.unmute(users[0].id, true, true);
+        };
+
+/* --------------- Callbacks ------------------ */
 
         function onTransportReady() {
             console.log("Transport ready");
@@ -136,11 +207,8 @@
         };
 
         function onCallOffered(msg) {
-          console.log("REceived call from  with", msg.id, msg.media);
-            if(msg.media === 'video') {
-            sono.answerWithVideo(msg.id);  
-            }
-            
+            console.log("REceived call from  with", msg.id, msg.media);
+            sono.answer(msg.id);  
         };
 
         function onCallAnswered(fromID) {
@@ -204,72 +272,7 @@
         function onErrorReceived(error) {
         };
 
-        function callVideo() {
-          var id = users[0].id;
-            sono.callWithVideo(id);
-        };
-
-        function addVideoToCall() {
-          var id = users[0].id;
-          sono.addVideoToCall(id);
-        }
-
-        function removeVideoToCall() {
-         var id = users[0].id;
-          sono.removeVideoFromCall(id); 
-        }
-
-        function callScreen() {
-          var id = users[0].id;
-            sono.callWithScreen(id);
-        }
-
-        function call2() {
-            sono.call(users[1].id);
-        };
-
-        function call3() {
-            sono.call(users[2].id);
-        };
-
-        function broadcast() {
-            sono.broadcastCall(users);
-        };
-
-        function sendAMessage() {
-            sono.sendMessage(
-                {
-                    data: {
-                        msg: new Date().getTime().toString(), 
-                        type: 'data'
-                    }, 
-                    recipient: 'all'
-                }
-            );
-        };
-
-        function share() {
-            
-            sono.localMedia().acquireScreen();
-        };
-
-        function stats() {
-            sono.setStats();
-        };
-
-        function stopStats() {
-            sono.stopStats();
-        };
-
-        function mute() {
-            document.getElementById('localVideo').setAttribute('muted', 'muted');
-            sono.mute(users[0].id, true, true);
-        };
-
-        function unmute() {
-            document.getElementById('localVideo').removeAttribute('muted');
-            sono.unmute(users[0].id, true, true);
-        };
+        
 
         function onStats(event) {
             console.log("STATS:", event);

@@ -287,55 +287,78 @@ IO.prototype = {
      */
 
     addDataChannelToPeer: function(callee) {
-        var peer = this.peerConnections(callee);
-        peer = null;
+        callee = null;
     },
 
     /**
      * Try to call an other peer
      * @param {String} callee The recipient ID
+     * @param {String} media 'video', 'screen', 'data'
+     * @param {Boolean} withDataChannel True to add data channel support to the peer (if possible)
      *
      * @api public
      */
 
-    callWithVideo: function(callee) {
-        var peer = this.peerConnections("v" + callee);
-        if(this.localMedia().isCameraCaptured()) {
-            peer.attach(this.localMedia().streamVideo());    
+    call: function(callee, media, withDataChannel) {
+
+        var m = media.substring(0,1);
+        var peer = this.peerConnections(m + callee, withDataChannel);
+        var isForScreenSharing = false;
+        
+        switch (media) {
+            case 'video':
+                if(this.localMedia().isCameraCaptured()) {
+                    peer.attach(this.localMedia().streamVideo());    
+                }
+                break;
+            case 'screen':
+                if(this.localMedia().isScreenCaptured()) {
+                    peer.attach(this.localMedia().streamScreen());
+                }
+                isForScreenSharing = true;
+                break;
+            case 'data':
+                //No other thing to do
+                break;
+            default:
+                break;
+
         }
-        peer.createOffer(false, null);
+        peer.createOffer(isForScreenSharing, withDataChannel, null);
     },
 
     /**
-     * Try to call an other peer with the screen sharing
-     * @param {String} callee The recipient ID
+     * Try to answer to call from a peer
+     * @param {String} caller The recipient ID
+     * @param {Boolean} doNotSendLocalVideo If true, do not share the local video (only receive the stream for the moment)
      *
      * @api public
      */
 
-    callWithScreen: function(callee) {
-        var peer = this.peerConnections("s" + callee);
-        if(this.localMedia().isScreenCaptured()) {
-            peer.attach(this.localMedia().streamScreen());    
-        }
-        peer.createOffer(true, null);
-    },    
+    answer: function(caller, doNotSendLocalVideo) {
 
-    /**
-     * Try to answer a call from an other peer
-     * @param {String} caller The caller ID
-     *
-     * @api public
-     */
+        var m = this._tmpOffer.media.substring(0,1);
+        var withDataChannel = this._tmpOffer.channel;
+        var peer = this.peerConnections(m + caller, withDataChannel);
 
-     answerWithVideo: function(caller) {
-        var peer = this.peerConnections("v" + caller);
-        if(this.localMedia().isCameraCaptured()) {
-            peer.attach(this.localMedia().streamVideo());    
+        switch (this._tmpOffer.media) {
+            case 'video':
+                if(this.localMedia().isCameraCaptured() && !doNotSendLocalVideo) {
+                    peer.attach(this.localMedia().streamVideo());    
+                }
+                break;
+            case 'screen':
+                break;
+            case 'data':
+                break;
+            default:
+                break;
         }
+
         peer.setRemoteDescription(new Sonotone.RTCSessionDescription(this._tmpOffer.data));
         peer.createAnswer();
-     },
+
+    },
 
     /**
      * Try to broadcast a call to all peers in order to diffuse

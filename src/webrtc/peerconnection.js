@@ -209,20 +209,21 @@ PeerConnection.prototype = {
 
     /**
      * Create an offer to one or several peers
-     * @param {Boolean} isScreencaptured True if the screen has been captured
+     * @param {Boolean} isForScreenSharing True if the screen has been captured
+     * @param {Boolean} withDataChannel True if DataChannel is required
      * @param {Object} fct The action to do on the peerConnection SDP
      *
      * @api public
      */ 
 
-    createOffer: function(screenCaptured, fct) {
+    createOffer: function(isForScreenSharing, withDataChannel, fct) {
 
         if(!this.offerPending) {
 
             var sdpConstraints = {
                 'mandatory': {
-                    'OfferToReceiveAudio': screenCaptured ? false : true,
-                    'OfferToReceiveVideo': screenCaptured ? false : true 
+                    'OfferToReceiveAudio': isForScreenSharing ? false : true,
+                    'OfferToReceiveVideo': isForScreenSharing ? false : true 
                 }
             };
 
@@ -262,7 +263,8 @@ PeerConnection.prototype = {
                     data: offerSDP,
                     caller: Sonotone.ID,
                     callee:  that._id.substring(1),
-                    media: screenCaptured ? 'screen' : 'video'
+                    media: isForScreenSharing ? 'screen' : 'video',
+                    channel: withDataChannel
                 };
 
                 that.offerPending = false;
