@@ -92,12 +92,6 @@ LocalMedia.prototype = {
                             maxHeight: 720
                         };
                         break;
-                    case 'cam':
-                        mediaConstraints.video.mandatory = {
-                            maxWidth: 960,
-                            maxHeight: 720
-                        };
-                        break;
                 }
             }
         }
@@ -192,7 +186,6 @@ LocalMedia.prototype = {
          if(this._isScreenCaptured) {
             Sonotone.log("LOCALMEDIA", "Stop local media - Screen stream...");
             this._streamScreen.stop();
-            this._callbacks.trigger('onLocalScreenStreamEnded', this._streamScreen);
         }
     },
 
@@ -206,7 +199,6 @@ LocalMedia.prototype = {
          if(this._isCameraCaptured) {
             Sonotone.log("LOCALMEDIA", "Stop local media - Video stream...");
             this._streamVideo.stop();
-            this._callbacks.trigger('onLocalVideoStreamEnded', this._streamScreen);
         }
     },
 
@@ -372,11 +364,30 @@ LocalMedia.prototype = {
 
         var that = this;
 
-        stream.onended = function() {
-            Sonotone.log("LOCALMEDIA", "Local Stream has ended"); 
-            //TODO
-            //Perahps we have to remove the MediaTrack that ended
-            that._callbacks.trigger('onLocalStreamEnded', that._stream);
+        stream.onended = function(e) {
+
+            var s = e.currentTarget;
+
+            if(that._streamVideo) {
+                if(s.id === that._streamVideo.id) {
+                    // It concerns the camera
+                    Sonotone.log("LOCALMEDIA", "Local Video Stream has ended");
+                    that._callbacks.trigger('onLocalVideoStreamEnded');
+                }
+                else {
+                    Sonotone.log("LOCALMEDIA", "Unknow ended stream");
+                }    
+            }
+            else if (that._streamScreen) {
+                if(s.id === that._streamScreen.id) {
+                    // It concerns the screen
+                    Sonotone.log("LOCALMEDIA", "Local Screen Stream has ended");
+                    that._callbacks.trigger('onLocalScreenStreamEnded');
+                }
+                else {
+                    Sonotone.log("LOCALMEDIA", "Unknow ended stream");
+                }
+            }
         };
 
         stream.onaddtrack = function() {

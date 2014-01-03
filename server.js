@@ -119,7 +119,7 @@ wsServer.on('request', function(request) {
 
     connections.push({id: '', socket: connection});
 
-    console.log("New peer connected");
+    console.log("Server: New peer (" + connections.length + " connections)");
 
     // This is the most important callback for us, we'll handle
     // all messages from users here.
@@ -133,23 +133,22 @@ wsServer.on('request', function(request) {
 
             var callee = msg.callee;
 
-            console.log("RECEIVED from <" + caller + ">:" + evt.utf8Data);
+            console.log("Server: from <" + caller + ">:" + evt.utf8Data);
 
             if(msg.data.type === "join") {
 
                 for (var i=0;i<connections.length;i++) {
                     // Associate Socket <-> ID
                     if(connections[i].socket === connection) {
-                        console.log("old id:" + connections[i].id);
                         connections[i].id = caller;
-                        console.log("<"+ caller + "> has been associated to a socket");
+                        console.log("Server: <"+ caller + "> has been associated to a socket");
                     }
                     // Send information about other peer connected
                     else {
-                        console.log("Inform <" + connections[i].id + "> about new peer <" + caller + ">");
+                        console.log("Server: Inform <" + connections[i].id + "> about new peer <" + caller + ">");
                         connections[i].socket.send(evt.utf8Data);
 
-                        console.log("Inform <" + caller + "> about connected <" + connections[i].id + ">");
+                        console.log("Server: Inform <" + caller + "> about connected <" + connections[i].id + ">");
 
                         // Send to this peer all others connections
                         var msg = {
@@ -165,27 +164,28 @@ wsServer.on('request', function(request) {
                 }
 
             } else {
+                //Send a message for a specific user
                 if(callee !== "all") {
-
-                     for (var i = 0;i < connections.length; i++) {
-                        console.log("Connections:" + connections[i].id);
-                        if(connections[i].id === callee) {
-                            console.log("Send message <" + msg.data.type + "> to <" + connections[i].id + ">");
-                            connections[i].socket.send(evt.utf8Data);
-                        }
-                     }
-                }
-                else {
                     for (var i = 0;i < connections.length; i++) {
-                        if(connections[i].socket !== connection) {
-                            console.log("Send message <" + msg.data.type + "> to <" + connections[i].id + ">");
+                        if(connections[i].id === callee) {
+                            console.log("Server: Send message <" + msg.data.type + "> to <" + connections[i].id + ">");
                             connections[i].socket.send(evt.utf8Data);
                         }
                     }
+
+                }
+                else {
+                    // Send message to all others users except the issuer
+                    console.log("Server: Dispatch message for all connections: " + connections.length);
+                    for (var i = 0;i < connections.length; i++) {
+                        if(connections[i].socket !== connection) {
+                            console.log("Server: Send message <" + msg.data.type + "> to <" + connections[i].id + ">");
+                            connections[i].socket.send(evt.utf8Data);
+                        }
+                    }
+                    console.log("Server: Dispatch end");
                 }
             }
-
-            
         }
         else {
           console.log("RECEIVED OTHER:" + evt.binaryData);
@@ -194,6 +194,8 @@ wsServer.on('request', function(request) {
 
     connection.on('close', function(evt) {
         
+        console.log("Server: One peer lost...");
+
         var index = -1;
 
         for (var i = 0;i < connections.length; i++) {
@@ -203,9 +205,9 @@ wsServer.on('request', function(request) {
         }
 
         if(index > -1) {
-            console.log("remove item:" + index);
             var old = connections.splice(index, 1);
-
+            console.log("Server: remove item " + old[0].id);
+            console.log("Server: " + connections.length + " connections still remains");
             //Inform others peer about the disconnection
             for (var i = 0;i < connections.length; i++) {
                 if(connections[i].socket !== connection) {
@@ -220,6 +222,8 @@ wsServer.on('request', function(request) {
                     connections[i].socket.send(JSON.stringify(toSend));
                 }
             }
+
+            old = null;
         }
     });
 });

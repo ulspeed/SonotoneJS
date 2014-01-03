@@ -21,7 +21,10 @@
     <p></p>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="share();">Share my Screen</button>
-    <button type="button" onclick="call();">Call a Peer</button>
+    <button type="button" onclick="callVideo();">VideoCall a Peer</button>
+    <button type="button" onclick="addVideoToCall();">AddVideoToCall</button>
+    <button type="button" onclick="removeVideoToCall();">RemoveVideoFromCall</button>
+    <button type="button" onclick="callScreen();">ScreenCall a Peer</button>
     <button type="button" onclick="call2();">Call 2nd Peer</button>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
     <button type="button" onclick="broadcast();">Call all Peers</button>
@@ -43,6 +46,7 @@
         var users = [];
 
         var isSharing = false;
+        var isVideo = false;
 
         var bytesNow, bytesPrev = 0;
         var timestampPrev;
@@ -55,7 +59,7 @@
             Sonotone.enableSTUN = false;
 
             // Create your Sonotone
-            sono = new Sonotone.IO(new Date().getTime());
+            sono = new Sonotone.IO(new Date().getTime().toString());
 
             // Listen to peers
             sono.on('onPeerConnected', onPeerConnected, this);
@@ -128,11 +132,15 @@
 
         function onPeerConnected(user) {
             users.push(user);
+            console.log("New User:" + user.id + " (" + users.length + " connected users)");
         };
 
-        function onCallOffered(fromID) {
-            console.log("fromID=" + fromID);
-            sono.answer(fromID);
+        function onCallOffered(msg) {
+          console.log("REceived call from  with", msg.id, msg.media);
+            if(msg.media === 'video') {
+            sono.answerWithVideo(msg.id);  
+            }
+            
         };
 
         function onCallAnswered(fromID) {
@@ -145,36 +153,40 @@
             document.getElementById('remoteVideo').src = '';
         };
 
-        function onPeerDisconnected(id) {
-            console.log("Disconnected=", id);
+        function onPeerDisconnected(msg) {
+            console.log("User to remove: ", msg.id);
             var indexToRemove = -1;
 
             for (var i=0; i < users.length; i++) {
-                if(users[i].id === id) {
+                if(users[i].id === msg.id) {
                     indexToRemove = i;
                 }
             }
             if(indexToRemove > -1) {
                 var removed = users.splice(indexToRemove, 1);
-                console.log("Removed", removed);
                 removed = null;
             }
+            console.log(users.length + " users remains");
         };
 
         function onLocalStreamStarted(stream) {
             sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
+            isVideo = true;
         };
 
         function onLocalScreenStreamStarted(stream) {
             sono.localMedia().renderScreenStream(document.getElementById('screenVideo'));
+            isSharing = true;
         }
 
         function onLocalStreamEnded() {
             document.getElementById('localVideo').src = '';
+            isVideo = false;
         };
 
         function onLocalScreenStreamEnded() {
             document.getElementById('screenVideo').src = '';
+            isSharing = false;
         }
 
         function onLocalStreamError(err) {
@@ -192,10 +204,25 @@
         function onErrorReceived(error) {
         };
 
-        function call() {
-            console.log("users", users);
-            sono.call(users[0].id);
+        function callVideo() {
+          var id = users[0].id;
+            sono.callWithVideo(id);
         };
+
+        function addVideoToCall() {
+          var id = users[0].id;
+          sono.addVideoToCall(id);
+        }
+
+        function removeVideoToCall() {
+         var id = users[0].id;
+          sono.removeVideoFromCall(id); 
+        }
+
+        function callScreen() {
+          var id = users[0].id;
+            sono.callWithScreen(id);
+        }
 
         function call2() {
             sono.call(users[1].id);
@@ -222,7 +249,7 @@
         };
 
         function share() {
-            isSharing = true;
+            
             sono.localMedia().acquireScreen();
         };
 

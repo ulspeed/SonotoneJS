@@ -9,9 +9,11 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     Sonotone.log("PEERCONNECTION", "Create new Peer Connection <" + id + ">");
 
-    this._id = id || new Date().getTime();
+    this._id = id || new Date().getTime().toString();
 
     this.isCaller = false;
+
+    this.offerPending = false;
 
     this.raw = null;
 
@@ -143,7 +145,9 @@ PeerConnection.prototype = {
     attach: function(stream) {
         Sonotone.log("PEERCONNECTION", "Attach a stream to the Peer Connection <" + this._id + ">");
         if(stream) {
-            this._peer.addStream(stream);
+            if(this._peer.getStreamById(stream.id) == null) {
+                this._peer.addStream(stream);                
+            }
         }
         else {
             Sonotone.log("PEERCONNECTION", "No stream to add");
@@ -160,8 +164,9 @@ PeerConnection.prototype = {
     detach: function(stream) {
         if(stream) {
             Sonotone.log("PEERCONNECTION", "Detach a stream to the Peer Connection <" + this._id + ">");
-            this._peer.removeStream(stream);
-            this.close();
+            if(this._peer.getStreamById(stream.id) !== null) {
+                this._peer.removeStream(stream);    
+            }
         }
         else {
             Sonotone.log("PEERCONNECTION", "No stream to remove");
@@ -204,7 +209,7 @@ PeerConnection.prototype = {
 
     /**
      * Create an offer to one or several peers
-     * @param {Boolean} isScreencaptured True if the screen has captured
+     * @param {Boolean} isScreencaptured True if the screen has been captured
      * @param {Object} fct The action to do on the peerConnection SDP
      *
      * @api public
@@ -212,61 +217,73 @@ PeerConnection.prototype = {
 
     createOffer: function(screenCaptured, fct) {
 
-        var sdpConstraints = {
-            'mandatory': {
-                'OfferToReceiveAudio': screenCaptured ? false : true,
-                'OfferToReceiveVideo': screenCaptured ? false : true 
-            }
-        };
+        if(!this.offerPending) {
 
-        this.isCaller = true;
-
-        var offerConstraints = {"optional": [], "mandatory": {}};
-
-        var constraints = Sonotone.mergeConstraints(offerConstraints, sdpConstraints);
-
-        Sonotone.log("PEERCONNECTION", "Create the SDP offer", constraints);
-
-        var that = this;
-    
-        this._peer.createOffer(function(offerSDP) {
-
-            if(fct) {
-                switch (fct.action) {
-                    case 'mute':
-                        offerSDP = that.muteSDP(offerSDP, fct.audio, fct.video);
-                        break;
-                    case 'unmute':
-                        offerSDP = that.unmuteSDP(offerSDP, fct.audio, fct.video);
-                        break;
-                    default:
-                        break;
+            var sdpConstraints = {
+                'mandatory': {
+                    'OfferToReceiveAudio': screenCaptured ? false : true,
+                    'OfferToReceiveVideo': screenCaptured ? false : true 
                 }
-            }
-            
-            //offerSDP.sdp = preferOpus(offerSDP.sdp);
-            that.setLocalDescription(offerSDP);
-            
-            Sonotone.log("PEERCONNECTION", "Send this SDP OFFER to the remote peer <" + that._id + ">");
-
-            var event = {
-                data: offerSDP,
-                caller: Sonotone.ID,
-                callee: that._id
             };
 
-            that._callbacks.trigger('onSDPOfferToSend', event);
+            this.isCaller = true;
 
-        }, function(error) {
-            Sonotone.log("PEERCONNECTION", "Fail to create Offer", error);
-        }, constraints);
+            this.offerPending = true;
+
+            var offerConstraints = {"optional": [], "mandatory": {}};
+
+            var constraints = Sonotone.mergeConstraints(offerConstraints, sdpConstraints);
+
+            Sonotone.log("PEERCONNECTION", "Create the SDP offer", constraints);
+
+            var that = this;
+        
+            this._peer.createOffer(function(offerSDP) {
+
+                if(fct) {
+                    switch (fct.action) {
+                        case 'mute':
+                            offerSDP = that.muteSDP(offerSDP, fct.audio, fct.video);
+                            break;
+                        case 'unmute':
+                            offerSDP = that.unmuteSDP(offerSDP, fct.audio, fct.video);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                
+                //offerSDP.sdp = preferOpus(offerSDP.sdp);
+                that.setLocalDescription(offerSDP);
+                
+                Sonotone.log("PEERCONNECTION", "Send this SDP OFFER to the remote peer <" + that._id + ">");
+
+                var event = {
+                    data: offerSDP,
+                    caller: Sonotone.ID,
+                    callee:  that._id.substring(1),
+                    media: screenCaptured ? 'screen' : 'video'
+                };
+
+                that.offerPending = false;
+
+                that._callbacks.trigger('onSDPOfferToSend', event);
+
+            }, function(error) {
+                Sonotone.log("PEERCONNECTION", "Fail to create Offer", error);
+                that.offerPending = false;
+            }, constraints);
+
+        }
     },
 
     /**
      * Create an SDP answer message
+     * @param {Boolean} isScreencaptured True if the screen has been captured
+     *
      */
 
-    createAnswer: function() {
+    createAnswer: function(screenCaptured) {
 
         var sdpConstraints = {
             'mandatory': {
@@ -288,7 +305,8 @@ PeerConnection.prototype = {
             var event = {
                 data: answerSDP,
                 caller: Sonotone.ID,
-                callee: that._id
+                callee: that._id.substring(1),
+                media: screenCaptured ? 'screen' : 'video'
             };
 
             that._callbacks.trigger('onSDPAnswerToSend', event);
@@ -370,8 +388,6 @@ PeerConnection.prototype = {
     sendFile: function(file) {
         this._dataChannel.sendFile(file);
     },
-
-    
 
     /**
      * Activate the stats for the peerConnection

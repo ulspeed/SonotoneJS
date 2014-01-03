@@ -174,15 +174,14 @@ IO.prototype = {
      * Manage the PeerConnections
      * Get/Create a PeerConnection
      * @param {String} id The ID of the PeerConnection (= the ID or the recipient)
-     * @param {Object} caps The remote peer capabilities
      *
      * @api public
      */
 
-    peerConnections: function(id, caps) {
+    peerConnections: function(id) {
         if(this._peerConnections[id] === undefined) {
             Sonotone.log("SONOTONE.IO", "PeerConnections not found, create a new one...", id);
-            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id, caps);
+            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id);
             this._subscribeToPeerConnectionEvent(this._peerConnections[id]);
         }
 
@@ -257,34 +256,86 @@ IO.prototype = {
     },
 
     /**
-     * Try to call an other peer
-     * @param {String} callee The recipient ID
-     * @param {Boolean} hasRemoteDataChannel True if the remote peer can use Data-Channel
+     * Add the local video stream to a Peer Connection
+     * @param {String} callee The callee
      *
      * @api public
      */
 
-    call: function(callee, hasRemoteDataChannel) {
-        var peer = this.peerConnections(callee, hasRemoteDataChannel);
+    addVideoToCall: function(callee) {
+        var peer = this.peerConnections("v" + callee, false);
         peer.attach(this.localMedia().streamVideo());
-        peer.createOffer(this.localMedia().isScreenCaptured());
     },
+
+    /**
+     * Remove the local video stream from the peer
+     * @param {String} callee The callee
+     *
+     * @api public
+     */
+
+     removeVideoFromCall: function(callee) {
+        var peer = this.peerConnections("v" + callee, false);
+        peer.detach(this.localMedia().streamVideo());   
+     },     
+
+    /**
+     * Add data channel to a peer connection
+     * @param {String} callee The callee
+     *
+     * @api public
+     */
+
+    addDataChannelToPeer: function(callee) {
+        var peer = this.peerConnections(callee);
+        peer = null;
+    },
+
+    /**
+     * Try to call an other peer
+     * @param {String} callee The recipient ID
+     *
+     * @api public
+     */
+
+    callWithVideo: function(callee) {
+        var peer = this.peerConnections("v" + callee);
+        if(this.localMedia().isCameraCaptured()) {
+            peer.attach(this.localMedia().streamVideo());    
+        }
+        peer.createOffer(false, null);
+    },
+
+    /**
+     * Try to call an other peer with the screen sharing
+     * @param {String} callee The recipient ID
+     *
+     * @api public
+     */
+
+    callWithScreen: function(callee) {
+        var peer = this.peerConnections("s" + callee);
+        if(this.localMedia().isScreenCaptured()) {
+            peer.attach(this.localMedia().streamScreen());    
+        }
+        peer.createOffer(true, null);
+    },    
 
     /**
      * Try to answer a call from an other peer
      * @param {String} caller The caller ID
-     * @param {Boolean} hasRemoteDataChannel True if the remote peer can use Data-Channel
      *
      * @api public
      */
 
-     answer: function(caller, hasRemoteDataChannel) {
-        var peer = this.peerConnections(caller, hasRemoteDataChannel);
-        peer.attach(this.localMedia().streamVideo());
-        peer.setRemoteDescription(new Sonotone.RTCSessionDescription(this._tmpOffer));
+     answerWithVideo: function(caller) {
+        var peer = this.peerConnections("v" + caller);
+        if(this.localMedia().isCameraCaptured()) {
+            peer.attach(this.localMedia().streamVideo());    
+        }
+        peer.setRemoteDescription(new Sonotone.RTCSessionDescription(this._tmpOffer.data));
         peer.createAnswer();
      },
-
 
     /**
      * Try to broadcast a call to all peers in order to diffuse
@@ -297,7 +348,7 @@ IO.prototype = {
     broadcastCall: function(callees) {
         for (var i=0;i<callees.length;i++) {
             var peer = this.peerConnections(callees[i]);
-            peer.attach(this.localMedia().streamVideo());
+            //peer.attach(this.localMedia().streamVideo());
             peer.createOffer(this.localMedia().isScreenCaptured());
         }
     },
@@ -310,6 +361,20 @@ IO.prototype = {
 
     releaseCall: function() {
         this.localMedia().release();
+    },
+
+    /**
+     * Close Connection with a peer
+     *
+     * @api public
+     */
+
+    release: function(userid) {
+        var peer = this._peerConnections(userid);
+
+        peer.close();
+
+        //TODO: need perhaps to remove the stream if included
     },
 
     /**
@@ -382,6 +447,8 @@ IO.prototype = {
             this._transport.on('onMessage', function(msg) {
                 Sonotone.log("SONOTONE.IO", "Received from Transport: " + msg.data.type);
 
+                var media = "";
+
                 switch (msg.data.type) {
                     case 'join':
                         this._callbacks.trigger('onPeerConnected', {id: msg.caller, caps: msg.data.caps});
@@ -390,19 +457,21 @@ IO.prototype = {
                         this._callbacks.trigger('onPeerAlreadyConnected', {id: msg.caller, caps: msg.data.caps});
                         break;
                     case 'release':
-                        this._callbacks.trigger('onPeerDisconnected', msg.caller);
-                        //this._removePeer(msg.caller);
+                        this._callbacks.trigger('onPeerDisconnected', {id: msg.caller});
                         break;
                     case 'offer':
-                        this._tmpOffer = msg.data;
-                        this._callbacks.trigger('onCallOffered', msg.caller);
+                        this._tmpOffer = msg;
+                        console.log("OFFER RECEIVED=", msg);
+                        this._callbacks.trigger('onCallOffered', {id: msg.caller, media: msg.media});
                         break;
                     case 'answer':
-                        this._callbacks.trigger('onCallAnswered', msg.caller);
-                        this.peerConnections(msg.caller).setRemoteDescription(new Sonotone.RTCSessionDescription(msg.data));
+                        this._callbacks.trigger('onCallAnswered', {id: msg.caller});
+                        media = msg.media.substring(0, 1);
+                        this.peerConnections(media + msg.caller).setRemoteDescription(new Sonotone.RTCSessionDescription(msg.data));
                         break;
                     case 'candidate':
-                        var peer = this.peerConnections(msg.caller); 
+                        media = msg.media.substring(0, 1);
+                        var peer = this.peerConnections(media + msg.caller); 
                         if(peer.answerCreated || peer.isCaller) {
                             if(!peer.isConnected) {
                                 peer.addIceCandidate(msg.data);
@@ -420,7 +489,7 @@ IO.prototype = {
                          this._callbacks.trigger('onPeerChat', {id: msg.caller, content: msg.data.content});
                         break;
                     case 'bye':
-                        this._callbacks.trigger('onCallEnded', msg.caller);
+                        this._callbacks.trigger('onCallEnded', {id: msg.caller});
                         break;
                     default:
                         this._callbacks.trigger('onTransportMessage', msg);
@@ -463,25 +532,49 @@ IO.prototype = {
             }, this);
 
             this._localMedia.on('onLocalVideoStreamEnded', function() {
-                Sonotone.log("SONOTONE.IO", "Local Media stopped");
+                Sonotone.log("SONOTONE.IO", "Local Video Media stopped");
+
+                console.log("peerconnection", this._peerConnections);
 
                 for(var peerID in this._peerConnections) {
-                    that.peerConnections(peerID).detach(that.localMedia().stream());
+                    console.log("peerID=", peerID);
+                    that.peerConnections(peerID).detach(that.localMedia().streamVideo());
 
                     //Inform other (SIG) about stopping call
                     that.sendMessage(
                         {
                             data: {
                                 type: 'bye',
+                                msg: 'Local camera video stopped'
                             },
                             caller: Sonotone.ID,
                             callee: that.peerConnections(peerID).ID()
                         }
                     );
-
                 }
 
             }, this);
+
+            this._localMedia.on('onLocalScreenStreamEnded', function() {
+                Sonotone.log("SONOTONE.IO", "Local Screen Media stopped");
+
+                for(var peerID in this._peerConnections) {
+                    that.peerConnections(peerID).detach(that.localMedia().streamScreen());
+
+                    //Inform other (SIG) about stopping call
+                    that.sendMessage(
+                        {
+                            data: {
+                                type: 'bye',
+                                msg: 'Local Screen video stopped'
+                            },
+                            caller: Sonotone.ID,
+                            callee: that.peerConnections(peerID).ID()
+                        }
+                    );
+                }
+
+            }, this);            
 
             this._localMedia.on('onLocalVideoStreamError', function(err) {
                 Sonotone.log("SONOTONE.IO", "Error on Local Media: " + err);
@@ -528,7 +621,8 @@ IO.prototype = {
                         candidate: event.candidate.candidate
                     },
                     caller: Sonotone.ID,
-                    callee: peer.ID()
+                    callee: peer.ID().substring(1),
+                    media: peer.ID().substring(0,1) === 'v' ? 'video' : 'screen'
                 };
 
                 this._transport.send(message);
@@ -627,6 +721,11 @@ IO.prototype = {
                     break;
             }
 
+        }, this);
+
+        // A change has been made that need a renegotiation
+        peer.on('onNegotiationNeeded', function() {
+            peer.createOffer(false);
         }, this);
 
         // Listen to Answer to send

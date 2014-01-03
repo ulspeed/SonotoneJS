@@ -1,3 +1,7 @@
+var Sonotone = Sonotone ? Sonotone : {};
+Sonotone.IO = (Sonotone.IO) ? (Sonotone.IO) : {};
+
+
 /**
  * Manage Events subscriptions and firings
  */
