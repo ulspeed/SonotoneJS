@@ -1,5 +1,9 @@
 /**
- * Adapter.
+ * Adapter
+ * For keeping API compatibility between Chrome and Firefox
+ * Compliant since:
+ * Chrome 28+
+ * Firefox 22+
  *
  * @namespace
  */
@@ -50,6 +54,53 @@ Adapter.prototype = {
             element.play();
 		}
 		return element;	
+	},
+
+	RTCPeerConnection: function (stun, constraints) {
+		if(this._isChrome) {
+			return new window.webkitRTCPeerConnection(stun, constraints);
+		} else if (this._isFirefox) {
+			return new window.mozRTCPeerConnection(stun, constraints);
+		}
+	},
+
+	RTCSessionDescription: function (sdp) {
+		if(this._isChrome) {
+			return new window.RTCSessionDescription(sdp);
+		} else if (this._isFirefox) {
+			return new window.mozRTCSessionDescription(sdp);
+		}	
+	},
+
+	RTCIceCandidate: function (candidate) {
+		if(this._isChrome) {
+			return new window.RTCIceCandidate(candidate);
+		} else if (this._isFirefox) {
+			return new window.mozRTCIceCandidate(candidate);
+		}	
+	},
+
+	RTCPeerConnectionConstraints: function() {
+		if(this._isChrome) {
+			return {
+				optional: [
+					{
+						DtlsSrtpKeyAgreement: true
+					}
+				]
+			};
+		} else if (this._isFirefox) {
+			return {
+				optional: [
+					{
+						RtpDataChannels: true
+					}
+				]
+			};
+		}	
 	}
+
+
+
 
 };
