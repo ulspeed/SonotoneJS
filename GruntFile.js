@@ -1,8 +1,4 @@
-//This Gruntfile defines the list of automation tasks that can be launched when developping, testing or producing new version of **OTC for Browsers**
-//
-//To install all the Grunt plugins needed:
-//1. Go to the </code>coco</code> directory
-//2. Launch <code>npm install</code>
+// This Gruntfile defines the list of automation tasks that can be launched when developping, testing or producing new version of SonotoneJS
 module.exports = function(grunt) {
    "use strict";
     grunt.initConfig({
@@ -92,8 +88,13 @@ module.exports = function(grunt) {
             }
         },
 
-        qunit: {
-            all: ['test/**/*.html']
+        blanket_qunit: {
+            all: {
+                options: {
+                    urls: ['test/run.html?coverage=true&gruntReport'],
+                    threshold: 20
+                }
+            }
         }
 
 
@@ -109,6 +110,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-banner');             // License
     grunt.loadNpmTasks('grunt-contrib-uglify');     // Code source uglification
     grunt.loadNpmTasks('grunt-contrib-qunit');      // For Qunit/SinonJS tests
+    grunt.loadNpmTasks('grunt-blanket-qunit');      // For Code coverage
 
     //### Main Tasks
     //Execute <code>grunt</code> to launch the default task: <code>watch</code>
@@ -117,6 +119,6 @@ module.exports = function(grunt) {
     //Execute all tasks for building the Sonotone.js library
     grunt.registerTask('build', ['jshint', 'concat', 'uglify', 'usebanner']);
 
-    grunt.registerTask('test', ['qunit']);
+    grunt.registerTask('test', ['blanket_qunit']);
 
  };

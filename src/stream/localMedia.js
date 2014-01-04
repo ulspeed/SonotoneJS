@@ -122,22 +122,22 @@ LocalMedia.prototype = {
             }
             else if(constraints.audio) {
                 Sonotone.log("LOCALMEDIA", "Ask for audio only", mediaConstraints);
-                if(this._caps.browser === "firefox") {
+                //if(this._caps.browser === "firefox") {
                     //mediaConstraints.video = false;
-                }
+                //}
             }
             else if(constraints.video) {
                 Sonotone.log("LOCALMEDIA", "Ask for video only", mediaConstraints);
-                if(this._caps.browser === "firefox") {
+                //if(this._caps.browser === "firefox") {
                     //mediaConstraints.audio = false;
-                }
+                //}
             }
             else {
                 Sonotone.log("LOCALMEDIA", "Ask for no media", mediaConstraints);
-                 if(this._caps.browser === "firefox") {
+                 //if(this._caps.browser === "firefox") {
                     //mediaConstraints.audio = false;
                     //mediaConstraints.video = false;
-                }
+                //}
             }
 
             this._requestUserMediaPending = true;
@@ -148,7 +148,6 @@ LocalMedia.prototype = {
                 that._requestUserMediaPending = false;
                 that._subscribeToStreamEvent(that._streamVideo);
                 that._isCameraCaptured = true;
-                console.log("stream", that._streamVideo);
                 that._callbacks.trigger('onLocalVideoStreamStarted', that._streamVideo);
             }, function(_error) {
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media", _error);   
@@ -161,6 +160,9 @@ LocalMedia.prototype = {
             if(!this._caps.canDoAudioVideoCall) {
                 Sonotone.log("LOCALMEDIA", "Browser not compliant for Audio/Video Communication");  
                 this._callbacks.trigger('onLocalVideoStreamError', {code: 2, message:"", name: "BROWSER_NOT_COMPLIANT"});
+            }
+            else {
+                Sonotone.log("LOCALMEDIA", "Aquire already in progress...");  
             }
         } 
     },
