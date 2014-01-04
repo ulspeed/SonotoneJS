@@ -1,11 +1,12 @@
 /**
  * IO namespace.
  * @param {String} id The ID of the user
+ * @param {stunTurnOption}
  *
  * @namespace
  */
 
-var IO = Sonotone.IO = function(id) {
+var IO = Sonotone.IO = function(id, stunConfig, turnConfig) {
 
     // Display Sonotone.IO version in logs
     Sonotone.log("SONOTONE.IO", "Running v" + Sonotone.VERSION);
@@ -17,6 +18,23 @@ var IO = Sonotone.IO = function(id) {
      */
 
     Sonotone.ID = id;
+
+    /**
+     * Configuration for STUN
+     *
+     * @api public
+     */
+
+    Sonotone.stunConfig = stunConfig;
+
+    /**
+     * Configuration for TURN
+     * TODO: Take into account TURN server
+     *
+     * @api public
+     */
+
+    Sonotone.turnConfig = turnConfig;    
 
     /**
      * Transport to use
@@ -55,7 +73,7 @@ var IO = Sonotone.IO = function(id) {
      * @api private
      */
 
-    this._remoteMedia = new Sonotone.IO.RemoteMedia();
+    this._remoteMedia = new Sonotone.IO.RemoteMedia(this._adapter);
 
     /**
      * Adapter
@@ -195,7 +213,7 @@ IO.prototype = {
     peerConnections: function(id) {
         if(this._peerConnections[id] === undefined) {
             Sonotone.log("SONOTONE.IO", "PeerConnections not found, create a new one...", id);
-            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id);
+            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id, false, this._adapter);
             this._subscribeToPeerConnectionEvent(this._peerConnections[id]);
         }
 
@@ -354,6 +372,7 @@ IO.prototype = {
         var m = this._tmpOffer.media.substring(0,1);
         var withDataChannel = this._tmpOffer.channel;
         var peer = this.peerConnections(m + caller, withDataChannel);
+        var isForScreenSharing = this._tmpOffer.media === 'video' ? false : true;
 
         switch (this._tmpOffer.media) {
             case 'video':
@@ -369,8 +388,8 @@ IO.prototype = {
                 break;
         }
 
-        peer.setRemoteDescription(new Sonotone.RTCSessionDescription(this._tmpOffer.data));
-        peer.createAnswer();
+        peer.setRemoteDescription(this._adapter.RTCSessionDescription(this._tmpOffer.data));
+        peer.createAnswer(isForScreenSharing);
 
     },
 
@@ -385,7 +404,6 @@ IO.prototype = {
     broadcastCall: function(callees) {
         for (var i=0;i<callees.length;i++) {
             var peer = this.peerConnections(callees[i]);
-            //peer.attach(this.localMedia().streamVideo());
             peer.createOffer(this.localMedia().isScreenCaptured());
         }
     },
@@ -503,7 +521,7 @@ IO.prototype = {
                     case 'answer':
                         this._callbacks.trigger('onCallAnswered', {id: msg.caller});
                         media = msg.media.substring(0, 1);
-                        this.peerConnections(media + msg.caller).setRemoteDescription(new Sonotone.RTCSessionDescription(msg.data));
+                        this.peerConnections(media + msg.caller).setRemoteDescription(this._adapter.RTCSessionDescription(msg.data));
                         break;
                     case 'candidate':
                         media = msg.media.substring(0, 1);

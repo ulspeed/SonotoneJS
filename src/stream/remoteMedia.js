@@ -5,12 +5,13 @@
  * @namespace
  */
 
-var RemoteMedia = Sonotone.IO.RemoteMedia = function() {
+var RemoteMedia = Sonotone.IO.RemoteMedia = function(adapter) {
     Sonotone.log("REMOTEMEDIA", "RemoteMedia initialized");
 
     this._callbacks = new Sonotone.IO.Events();
     this._stream = {};
     this._mediaReady = false;
+    this._adapter = adapter;
 };
 
 /**
@@ -75,7 +76,7 @@ RemoteMedia.prototype = {
 
     renderStream: function(HTMLMediaElement, peerID) {
         Sonotone.log("REMOTEMEDIA", "Render the remote stream associated to peer <" + peerID + ">"); 
-        Sonotone.attachToMedia(HTMLMediaElement, this._stream[peerID]);
+        this._adapter.attachToMedia(HTMLMediaElement, this._stream[peerID]);
     },
 
     /**

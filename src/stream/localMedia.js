@@ -262,7 +262,7 @@ LocalMedia.prototype = {
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media - Screen", _erroronstreaming);   
                 that._requestUserMediaPending = false;
                 that._callbacks.trigger('onLocalScreenStreamError', {code: 1, message:"", name: "PERMISSION_DENIED"});
-            });
+            }, this);
         }
         else {
             if(!this._caps.startedWithHTTPS) {

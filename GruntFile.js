@@ -92,7 +92,7 @@ module.exports = function(grunt) {
             all: {
                 options: {
                     urls: ['test/run.html?coverage=true&gruntReport'],
-                    threshold: 20
+                    threshold: 10
                 }
             }
         }

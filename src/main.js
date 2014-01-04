@@ -93,45 +93,12 @@ Sonotone.adapter = function() {
 
     if(navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
         // Firefox
-        Sonotone.getUserMedia = navigator.mozGetUserMedia.bind(navigator); 
-
-        Sonotone.RTCPeerConnection = window.mozRTCPeerConnection; 
-
-        Sonotone.RTCSessionDescription = window.mozRTCSessionDescription;
-        Sonotone.RTCIceCandidate = window.mozRTCIceCandidate;
-
-        Sonotone.constraints = {optional: [{RtpDataChannels: true}]};
-
-        Sonotone.attachToMedia = function(element, stream) {
-            element.mozSrcObject = stream;
-            element.play();
-        };
 
         Sonotone.STUN = {"iceServers": [{"url": "stun:stun.services.mozilla.com"}]};
 
     }
     else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
         // Chrome: can make call or Sharing
-        Sonotone.getUserMedia = navigator.webkitGetUserMedia.bind(navigator);
-
-        Sonotone.RTCSessionDescription = window.RTCSessionDescription;
-        Sonotone.RTCIceCandidate = window.RTCIceCandidate;
-
-        Sonotone.RTCPeerConnection = window.webkitRTCPeerConnection;
-
-        Sonotone.constraints = {optional: [{DtlsSrtpKeyAgreement: true}]};
-
-        Sonotone.attachToMedia = function(element, stream) {
-            if (typeof element.srcObject !== 'undefined') {
-                element.srcObject = stream;
-            } else if (typeof element.mozSrcObject !== 'undefined') {
-                element.mozSrcObject = stream;
-            } else if (typeof element.src !== 'undefined') {
-                element.src = window.URL.createObjectURL(stream);
-            } else {
-                Sonotone.log("SONOTONE.IO", "Error attaching stream to HTML Element");
-            }
-        };
 
         Sonotone.STUN = {
             iceServers: [

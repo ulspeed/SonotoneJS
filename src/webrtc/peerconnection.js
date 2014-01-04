@@ -5,7 +5,7 @@
  * @namespace
  */
 
-var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChannel) {
+var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChannel, adapter) {
 
     Sonotone.log("PEERCONNECTION", "Create new Peer Connection <" + id + ">");
 
@@ -23,14 +23,11 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this.statID = '';
 
-    if(Sonotone.enableSTUN) {
-        Sonotone.log("PEERCONNECTION", "Use STUN Server", Sonotone.STUN);
-        this._peer = new Sonotone.RTCPeerConnection(Sonotone.STUN, Sonotone.constraints);
-    }
-    else {
-        Sonotone.log("PEERCONNECTION", "No STUN server used");
-        this._peer = new Sonotone.RTCPeerConnection(null, Sonotone.constraints);   
-    }
+    this._adapter = adapter;
+
+    Sonotone.log("PEERCONNECTION", "Use STUN Server", Sonotone.stunConfig);
+
+    this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, this._adapter.RTCPeerConnectionConstraints(), this._adapter);
 
     this._dataChannel = new Sonotone.IO.DataChannel(id, hasRemoteDataChannel, this._peer);
 
@@ -144,9 +141,24 @@ PeerConnection.prototype = {
 
     attach: function(stream) {
         Sonotone.log("PEERCONNECTION", "Attach a stream to the Peer Connection <" + this._id + ">");
+        
         if(stream) {
-            if(this._peer.getStreamById(stream.id) == null) {
-                this._peer.addStream(stream);                
+
+            var streams = this._peer.getLocalStreams(),
+            alreadyAdded = false;
+            for (var i=0;i< streams.length;i++) {
+                if(streams[i].id === stream.id) {
+                    alreadyAdded = true;
+                }
+            }
+
+            //As getStreamById is not yet implemented in Firefox, we should use the getLocalStreams method
+            //if(this._peer.getStreamById(stream.id) == null) {
+            if(!alreadyAdded) {
+                this._peer.addStream(stream);
+            }
+            else {
+                Sonotone.log("PEERCONNECTION", "Stream already added to the Peer Connection <" + this._id + ">");
             }
         }
         else {
@@ -330,7 +342,7 @@ PeerConnection.prototype = {
 
     addIceCandidate: function(ICEcandidate)  {
         Sonotone.log("PEERCONNECTION", "Add ICE CANDIDATE to the PEER CONNECTION <" + this._id + ">");
-        var candidate = new Sonotone.RTCIceCandidate({sdpMLineIndex:ICEcandidate.label, candidate:ICEcandidate.candidate, id: ICEcandidate.sdpMid});
+        var candidate = this._adapter.RTCIceCandidate({sdpMLineIndex:ICEcandidate.label, candidate:ICEcandidate.candidate, id: ICEcandidate.sdpMid});
         this._peer.addIceCandidate(candidate);
     },  
 
