@@ -498,7 +498,6 @@ IO.prototype = {
                         break;
                     case 'offer':
                         this._tmpOffer = msg;
-                        console.log("OFFER RECEIVED=", msg);
                         this._callbacks.trigger('onCallOffered', {id: msg.caller, media: msg.media});
                         break;
                     case 'answer':
@@ -571,10 +570,7 @@ IO.prototype = {
             this._localMedia.on('onLocalVideoStreamEnded', function() {
                 Sonotone.log("SONOTONE.IO", "Local Video Media stopped");
 
-                console.log("peerconnection", this._peerConnections);
-
                 for(var peerID in this._peerConnections) {
-                    console.log("peerID=", peerID);
                     that.peerConnections(peerID).detach(that.localMedia().streamVideo());
 
                     //Inform other (SIG) about stopping call

@@ -48,7 +48,8 @@ Adapter.prototype = {
 		else if(this._isFirefox) {
 			element.mozSrcObject = stream;
             element.play();
-		}	
+		}
+		return element;	
 	}
 
 };

@@ -1,3 +1,5 @@
+module("Tests the subscription to an event");
+
 test("When subscribing to event, my callback function is called", function () {
     
 	var events = new Sonotone.IO.Events();
@@ -56,6 +58,8 @@ test("When subscribing to event, my callback is called each time the event is fi
 
     ok(callback.calledThrice, "Callback is called each time");
 });
+
+module("Tests the unsubscription from an event");
 
 test("When unsubscribing to an event, my callback is no more called", function () {
     

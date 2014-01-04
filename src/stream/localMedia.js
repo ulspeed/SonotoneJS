@@ -50,7 +50,7 @@ LocalMedia.prototype = {
             mediaConstraints.video = {
                 mandatory: {
                     maxWidth: 320,
-                    maxHeight: 180
+                    maxHeight: 240
                 }, 
                 optional: []
             };
@@ -92,6 +92,12 @@ LocalMedia.prototype = {
                         mediaConstraints.video.mandatory = {
                             maxWidth: 1280,
                             maxHeight: 720
+                        };
+                        break;
+                    default:
+                        mediaConstraints.video.mandatory = {
+                            maxWidth: 320,
+                            maxHeight: 240
                         };
                         break;
                 }
@@ -216,7 +222,7 @@ LocalMedia.prototype = {
     acquireScreen: function(constraints) {
 
         // Screen sharing seems to work only using HTTPS
-        if(this._caps.canDoScreenSharing) {
+        if(this._caps.canDoScreenSharing && this._caps.startedWithHTTPS) {
             var that = this;
 
             var maxWidth = screen.width;
@@ -242,12 +248,11 @@ LocalMedia.prototype = {
 
             Sonotone.log("LOCALMEDIA", "Ask for screen media", video_constraints);
 
-            Sonotone.getUserMedia({
+            this._adapter.getUserMedia({
                 video: video_constraints
             }, function(_stream) {
                 Sonotone.log("LOCALMEDIA", "User has granted access to local media - Screen");              
                 that._streamScreen = _stream;
-                console.log("stream", _stream);
                 that._requestUserMediaPending = false;
                 that._isScreenCaptured = true;
                 that._subscribeToStreamEvent(that._streamScreen);
@@ -315,8 +320,12 @@ LocalMedia.prototype = {
 
     renderVideoStream: function(HTMLMediaElement) {
         Sonotone.log("LOCALMEDIA", "Render the local stream - Video"); 
-        //Sonotone.attachToMedia(HTMLMediaElement, this._streamVideo);
-        this._adapter.attachToMedia(HTMLMediaElement, this._streamVideo);
+        if(this._streamVideo) {
+            return this._adapter.attachToMedia(HTMLMediaElement, this._streamVideo);    
+        }
+        else {
+            return null;
+        }
     },
 
      /**
@@ -326,8 +335,13 @@ LocalMedia.prototype = {
      */
 
     renderScreenStream: function(HTMLMediaElement) {
-        Sonotone.log("LOCALMEDIA", "Render the local stream - Screen"); 
-        Sonotone.attachToMedia(HTMLMediaElement, this._streamScreen);
+        Sonotone.log("LOCALMEDIA", "Render the local stream - Screen");
+        if(this._streamScreen) {
+            return this._adapter.attachToMedia(HTMLMediaElement, this._streamScreen);    
+        }
+        else {
+            return null;
+        }
     },
 
     /**
@@ -336,7 +350,11 @@ LocalMedia.prototype = {
      * @api public
      */
 
-    streamVideo: function() {
+    streamVideo: function(streamVideo) {
+        if(streamVideo) {
+            this._streamVideo = streamVideo;
+            this._isCameraCaptured = true;
+        }
         return this._streamVideo;
     },
 
@@ -346,7 +364,11 @@ LocalMedia.prototype = {
      * @api public
      */
 
-    streamScreen: function() {
+    streamScreen: function(streamScreen) {
+        if(streamScreen) {
+            this._streamScreen = streamScreen;
+            this._isScreenCaptured = true;
+        }
         return this._streamScreen;
     },
 
