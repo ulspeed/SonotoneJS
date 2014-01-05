@@ -415,6 +415,80 @@ You can configure and connect to your server in one line of code
 <p>You will receive a JSON object with the ID of the disconnected user</p>
 
 
+<h3>Listen to incoming events</h3>
+
+<p>To be notified when an other user calls you, you have to listen to the following events.</p>
+
+
+<h4>When a new call is received</h4>
+
+<p>This event is fired each a user try to have a communication with you (audio/video or screen sharing)</p>
+
+<pre><code>sono.on('onCallOffered', myCallback, context);</code></pre>
+
+<p>In your callback, you will receive a JSON object with the ID of the user who calls you and the media used (video or screen sharing)</p>
+
+
+<h4>When the remote peer answer to your call</h4>
+
+<p>This event is fired when the remote peer answers your call</p>
+
+<pre><code>sono.on('onCallAnswered', myCallback, context);</code></pre>
+
+<p>In your callback, you will receive a JSON object with the ID of the user who answers the call and the media used (the same as the one you choose for starting the call).</p>
+
+
+<h4>When the call is ended</h4>
+
+<p>This event is fired when a user ends the call</p>
+
+<pre><code>sono.on('onCallEnded', myCallback, context);</code></pre>
+
+<p>In your callback, you will receive a JSON object with the ID of the use who terminates the call and the media left.</p>
+
+
+<h3>Interact with others users</h3>
+
+<p>SonotoneJS offers a large set or methods to interact with others users. In most of them, you need to have the ID or the remote user in order to interact with him.</p>
+
+
+<h4>sono.call()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.answer()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.release()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.addVideoToCall()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.removeVideoFromCall()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.sendChatMessage()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.sendPrivateChatMessage()</h4>
+
+<p>!!! TODO</p>
+
+
+<h4>sono.sendMessage()</h4>
+
 <p>!!! TODO</p>
 
 
