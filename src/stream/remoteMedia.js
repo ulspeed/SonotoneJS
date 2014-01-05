@@ -44,7 +44,7 @@ RemoteMedia.prototype = {
 
             this._subscribeToStreamEvent(stream, id, mediaType);
 
-            this._callbacks.trigger('onRemoteStreamStarted', {id: id, media: mediaType});
+            this._callbacks.trigger('onRemoteStreamStarted', {id: id, media: mediaType, stream: stream});
         }
 
         return this._stream;

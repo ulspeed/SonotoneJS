@@ -87,6 +87,8 @@ test("Test that aquire method call the OK callback with the correct paramters", 
 
     equal(spy.args.length, 1, "Callback is called with the stream");
     equal(typeof spy.args[0][0], 'object', "Callback is called with the stream");
+    equal(spy.args[0][0].media, 'video', "Callback is called with the stream");
+    equal(typeof spy.args[0][0].stream, 'object', "Callback is called with the stream");
     notEqual(localMedia.streamVideo(), null, "Stream Video has been instantiated");
     equal(localMedia.streamScreen(), null, "Stream Screen is still null");
     equal(localMedia.isCameraCaptured(), true, "Stream video has been captured");
@@ -297,6 +299,8 @@ test("Test that aquire method call the OK callback with the correct paramters", 
 
     equal(spy.args.length, 1, "Callback is called with the stream");
     equal(typeof spy.args[0][0], 'object', "Callback is called with the stream");
+    equal(spy.args[0][0].media, 'screen', "Callback is called with the stream");
+    equal(typeof spy.args[0][0].stream, 'object', "Callback is called with the stream");
     notEqual(localMedia.streamScreen(), null, "Stream Video has been instantiated");
     equal(localMedia.streamVideo(), null, "Stream Screen is still null");
     equal(localMedia.isCameraCaptured(), false, "Stream video has been captured");

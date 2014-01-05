@@ -154,7 +154,7 @@ LocalMedia.prototype = {
                 that._requestUserMediaPending = false;
                 that._subscribeToStreamEvent(that._streamVideo);
                 that._isCameraCaptured = true;
-                that._callbacks.trigger('onLocalVideoStreamStarted', that._streamVideo);
+                that._callbacks.trigger('onLocalVideoStreamStarted', {media: 'video', stream: that._streamVideo});
             }, function(_error) {
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media", _error);   
                 that._requestUserMediaPending = false;
@@ -256,7 +256,7 @@ LocalMedia.prototype = {
                 that._requestUserMediaPending = false;
                 that._isScreenCaptured = true;
                 that._subscribeToStreamEvent(that._streamScreen);
-                that._callbacks.trigger('onLocalScreenStreamStarted', that._streamScreen);
+                that._callbacks.trigger('onLocalScreenStreamStarted', {media:'screen', stream: that._streamScreen});
             }, function(_erroronstreaming) {
                 that._isScreenCaptured = false;
                 Sonotone.log("LOCALMEDIA", "Failed to get access to local media - Screen", _erroronstreaming);   
