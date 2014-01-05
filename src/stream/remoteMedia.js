@@ -110,6 +110,11 @@ RemoteMedia.prototype = {
             //TODO
             //Perahps we have to remove the MediaTrack that ended
             that._callbacks.trigger('onRemoteStreamEnded', {id: id, media: media});
+
+            // Free memory
+            var peerID = media.substring(0,1) + id;
+            that.streams[peerID] = null;
+            delete that.streams[peerID];
         };
 
         stream.onaddtrack = function() {
