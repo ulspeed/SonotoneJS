@@ -199,6 +199,7 @@ PeerConnection.prototype = {
      */
 
     detach: function(stream) {
+
         if(stream) {
             Sonotone.log("PEERCONNECTION", "Detach a stream to the Peer Connection <" + this._id + ">");
             
@@ -212,7 +213,7 @@ PeerConnection.prototype = {
 
             //As getStreamById is not yet implemented in Firefox, we should use the getLocalStreams method
             //if(this._peer.getStreamById(stream.id) !== null) {
-            if(exist) {
+            if(exist && !stream.ended) {
                 this._peer.removeStream(stream);    
             }
         }

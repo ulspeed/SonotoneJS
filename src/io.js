@@ -411,16 +411,6 @@ IO.prototype = {
     },
 
     /**
-     * Release the call
-     * 
-     * @api public
-     */
-
-    //releaseCall: function() {
-    //    this.localMedia().release();
-    //},
-
-    /**
      * Close Connection with a peer
      *
      * @api public
@@ -429,10 +419,18 @@ IO.prototype = {
     release: function(callee, media) {
         var peerID = media.substring(0,1) + callee;
 
+        // Release the media
+        if(media === 'video') {
+            this._localMedia.releaseVideo();
+        }
+        else {
+            this._localMedia.releaseScreen();
+        }
+
+        // Close the associated peerConnection
         var peer = this.peerConnections(peerID);
 
         peer.close();
-        //TODO: need perhaps to remove the stream if included
     },
 
     /**
@@ -522,7 +520,7 @@ IO.prototype = {
                         this._callbacks.trigger('onCallOffered', {id: msg.caller, media: msg.media});
                         break;
                     case 'answer':
-                        this._callbacks.trigger('onCallAnswered', {id: msg.caller});
+                        this._callbacks.trigger('onCallAnswered', {id: msg.caller, media: msg.media});
                         media = msg.media.substring(0, 1);
                         this.peerConnections(media + msg.caller).setRemoteDescription(this._adapter.RTCSessionDescription(msg.data));
                         break;
@@ -546,7 +544,7 @@ IO.prototype = {
                          this._callbacks.trigger('onPeerChat', {id: msg.caller, content: msg.data.content});
                         break;
                     case 'bye':
-                        this._callbacks.trigger('onCallEnded', {id: msg.caller});
+                        this._callbacks.trigger('onCallEnded', {id: msg.caller, media: msg.media});
                         break;
                     default:
                         this._callbacks.trigger('onTransportMessage', msg);
@@ -595,16 +593,16 @@ IO.prototype = {
                     that.peerConnections(peerID).detach(that.localMedia().streamVideo());
 
                     //Inform other (SIG) about stopping call
-                    that.sendMessage(
-                        {
-                            data: {
-                                type: 'bye',
-                                msg: 'Local camera video stopped'
-                            },
-                            caller: Sonotone.ID,
-                            callee: that.peerConnections(peerID).ID()
-                        }
-                    );
+                    var message = {
+                        data: {
+                            type: 'bye',
+                        },
+                        media: 'video',
+                        caller: Sonotone.ID,
+                        callee: peerID.substring(1)
+                    };
+
+                    that._transport.send(message);
                 }
 
             }, this);
@@ -616,16 +614,16 @@ IO.prototype = {
                     that.peerConnections(peerID).detach(that.localMedia().streamScreen());
 
                     //Inform other (SIG) about stopping call
-                    that.sendMessage(
-                        {
-                            data: {
-                                type: 'bye',
-                                msg: 'Local Screen video stopped'
-                            },
-                            caller: Sonotone.ID,
-                            callee: that.peerConnections(peerID).ID()
-                        }
-                    );
+                    var message = {
+                        data: {
+                            type: 'bye',
+                        },
+                        caller: Sonotone.ID,
+                        callee: peerID.substring(1),
+                        media: 'screen',
+                    };
+
+                    that._transport.send(message);
                 }
 
             }, this);            
@@ -744,7 +742,7 @@ IO.prototype = {
                 // Connection OK
                 case "connected":
                     this.peerConnections(peer.ID()).isConnected = true;
-                    this._callbacks.trigger('onCallStarted', peer.ID());
+                    this._callbacks.trigger('onCallStarted', {id: peer.ID(), media: peer.media()});
 
                     var pc = this.peerConnections(peer.ID()).peer();
                     var streams = null;
@@ -772,7 +770,7 @@ IO.prototype = {
                 // PeerConnection closed
                 case "closed":
                     Sonotone.log("SONOTONE.IO", "Closed PeerConnection <" + peer.ID() + ">");
-                    //this._removePeer(peer.ID());
+                    this._removePeer(peer.ID());
                     break;
             }
 

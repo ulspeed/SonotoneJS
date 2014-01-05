@@ -43,8 +43,13 @@ RemoteMedia.prototype = {
             var id = peerID.substring(1);
 
             this._subscribeToStreamEvent(stream, id, mediaType);
-
-            this._callbacks.trigger('onRemoteStreamStarted', {id: id, media: mediaType, stream: stream});
+            if(mediaType === 'video') {
+                this._callbacks.trigger('onRemoteVideoStreamStarted', {id: id, media: mediaType, stream: stream});    
+            }
+            else {
+                this._callbacks.trigger('onRemoteScreenStreamStarted', {id: id, media: mediaType, stream: stream});    
+            }
+            
         }
 
         return this._stream;
@@ -109,7 +114,12 @@ RemoteMedia.prototype = {
             Sonotone.log("REMOTEMEDIA", "Remote Stream has ended"); 
             //TODO
             //Perahps we have to remove the MediaTrack that ended
-            that._callbacks.trigger('onRemoteStreamEnded', {id: id, media: media});
+            if(media === 'video') {
+                that._callbacks.trigger('onRemoteVideoStreamEnded', {id: id, media: media});
+            }
+            else {
+                that._callbacks.trigger('onRemoteScreenStreamEnded', {id: id, media: media});   
+            }
 
             // Free memory
             var peerID = media.substring(0,1) + id;

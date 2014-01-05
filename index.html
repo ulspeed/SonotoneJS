@@ -100,8 +100,10 @@
 
             // Listen to remote media
             sono.localMedia().on('onLocalVideoStreamError', onLocalStreamError, this);
-            sono.remoteMedia().on('onRemoteStreamStarted', onRemoteStreamStarted, this);
-            sono.remoteMedia().on('onRemoteStreamEnded', onRemoteStreamEnded, this);
+            sono.remoteMedia().on('onRemoteVideoStreamStarted', onRemoteStreamStarted, this);
+            sono.remoteMedia().on('onRemoteVideoStreamEnded', onRemoteStreamEnded, this);
+            sono.remoteMedia().on('onRemoteScreenStreamStarted', onRemoteStreamStarted, this);
+            sono.remoteMedia().on('onRemoteScreenStreamEnded', onRemoteStreamEnded, this);
 
             // Define your transport layer (WebSocket)
             sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
@@ -222,18 +224,26 @@
         };
 
         function onCallOffered(msg) {
-            console.log("REceived call from  with", msg.id, msg.media);
+            console.log("ON CALL OFFERED:", msg);
             sono.answer(msg.id);  
         };
 
-        function onCallAnswered(fromID) {
+        function onCallAnswered(msg) {
+          console.log("ON CALL ANSWERED:", msg);
         };
 
-        function onCallStarted(fromID) {
+        function onCallStarted(msg) {
+          console.log("ON CALL STARTED:", msg);
         };
 
-        function onCallEnded(fromID) {
-            document.getElementById('remoteVideo').src = '';
+        function onCallEnded(msg) {
+            console.log("ON CALL ENDED:", msg);
+            if(msg.media === 'video') {
+              document.getElementById('remoteVideo').src = '';
+            }
+            else {
+              document.getElementById('remoteScreen').src = '';  
+            }
         };
 
         function onPeerDisconnected(msg) {
