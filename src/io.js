@@ -297,7 +297,7 @@ IO.prototype = {
      */
 
     addVideoToCall: function(callee) {
-        var peer = this.peerConnections("v" + callee, false);
+        var peer = this.peerConnections("v" + callee);
         peer.attach(this.localMedia().streamVideo());
     },
 
@@ -308,10 +308,10 @@ IO.prototype = {
      * @api public
      */
 
-     removeVideoFromCall: function(callee) {
-        var peer = this.peerConnections("v" + callee, false);
+    removeVideoFromCall: function(callee) {
+        var peer = this.peerConnections("v" + callee);
         peer.detach(this.localMedia().streamVideo());   
-     },     
+     },
 
     /**
      * Add data channel to a peer connection
@@ -416,9 +416,9 @@ IO.prototype = {
      * @api public
      */
 
-    releaseCall: function() {
-        this.localMedia().release();
-    },
+    //releaseCall: function() {
+    //    this.localMedia().release();
+    //},
 
     /**
      * Close Connection with a peer
@@ -426,11 +426,12 @@ IO.prototype = {
      * @api public
      */
 
-    release: function(userid) {
-        var peer = this._peerConnections(userid);
+    release: function(callee, media) {
+        var peerID = media.substring(0,1) + callee;
+
+        var peer = this.peerConnections(peerID);
 
         peer.close();
-
         //TODO: need perhaps to remove the stream if included
     },
 
@@ -706,7 +707,6 @@ IO.prototype = {
         peer.on('onRemoteStreamReceived', function(event) {
 
             Sonotone.log("SONOTONE.IO", "Create the Remote Media with this remote stream received");
-            console.log("PPPPPPPP>>>", peer.media());
             this._remoteMedia.stream(event.stream, peer.ID(), peer.media());
 
         }, this);
@@ -764,13 +764,15 @@ IO.prototype = {
 
                 // Disconnected by the other peer
                 case "disconnected":
+                    Sonotone.log("SONOTONE.IO", "Disconnected PeerConnection <" + peer.ID() + ">");
                     this.peerConnections(peer.ID()).isConnected = false;
                     this.peerConnections(peer.ID()).close();
                     break;
 
                 // PeerConnection closed
                 case "closed":
-                    this._removePeer(peer.ID());
+                    Sonotone.log("SONOTONE.IO", "Closed PeerConnection <" + peer.ID() + ">");
+                    //this._removePeer(peer.ID());
                     break;
             }
 

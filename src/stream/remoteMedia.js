@@ -113,8 +113,8 @@ RemoteMedia.prototype = {
 
             // Free memory
             var peerID = media.substring(0,1) + id;
-            that.streams[peerID] = null;
-            delete that.streams[peerID];
+            that._stream[peerID] = null;
+            delete that.stream[peerID];
         };
 
         stream.onaddtrack = function() {

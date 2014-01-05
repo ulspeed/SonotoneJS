@@ -22,21 +22,28 @@
 
     <p></p>
     <button type="button" onclick="startVideo();">Pick my Video</button>
-    <button type="button" onclick="share();">Share my Screen</button>
     <button type="button" onclick="callVideo();">VideoCall a Peer</button>
-    <button type="button" onclick="addVideoToCall();">AddVideoToCall</button>
-    <button type="button" onclick="removeVideoToCall();">RemoveVideoFromCall</button>
+    <button type="button" onclick="removeVideoToCall();">Remove Video</button>
+    <button type="button" onclick="addVideoToCall();">Add Video</button>
+    <button type="button" onclick="stopVideo();">Stop Video</button>
+    <br>
+    <button type="button" onclick="share();">Pick my Screen</button>
     <button type="button" onclick="callScreen();">ScreenCall a Peer</button>
+    <button type="button" onclick="endScreen();">Stop Screen</button>
+    <br>
+    <button type="button" onclick="mute();">Mute</button>
+    <button type="button" onclick="unmute();">Unmute</button>
+    <br>
+    <button type="button" onclick="stopCall();">Release Call</button>
+    <br>
+    <button type="button" onclick="stats();">Stats</button>
+    <button type="button" onclick="stopStats();">Stop Stats</button>
+    <br>
+
     <button type="button" onclick="call2();">Call 2nd Peer</button>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
     <button type="button" onclick="broadcast();">Call all Peers</button>
-    <button type="button" onclick="stopVideo();">Release Call</button>
     <button type="button" onclick="sendAMessage();">SendMessage</button>
-    <button type="button" onclick="stats();">Stats</button>
-    <button type="button" onclick="stopStats();">Stop Stats</button>
-    <button type="button" onclick="mute();">Mute</button>
-    <button type="button" onclick="unmute();">Unmute</button>
-
     <footer id="footer">
     </footer>
     <script type="text/javascript" src="dist/sonotone.js"></script>
@@ -115,8 +122,14 @@
         };
 
         function stopVideo() {
-            sono.releaseCall();
+            var id = users[0].id;
+            console.log("coucou");
+            sono.release(id, 'video');
         };
+
+        function endSCreen() {
+          sono.releaseScreen();
+        }
 
         function callVideo() {
           var id = users[0].id;
