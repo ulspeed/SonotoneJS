@@ -9,7 +9,20 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     Sonotone.log("PEERCONNECTION", "Create new Peer Connection <" + id + ">");
 
-    this._id = id || new Date().getTime().toString();
+    /**
+     * PeerConnection ID
+     * (s)xxxxxxxxx : for Screen sharing PeerConnection
+     * (v)xxxxxxxxx : for Video PeerConnection
+     */
+
+    this._id = id;
+
+    /**
+     * Dedicated Media
+     * Can be: video, screen data
+     */
+
+    this._media = (id.substring(0, 1) === 'v') ? 'video' : 'screen';
 
     this.isCaller = false;
 
@@ -133,6 +146,18 @@ PeerConnection.prototype = {
     },
 
     /**
+     * Media of the Peer Connection
+     *
+     * @api public
+     */
+    media: function(media) {
+        if(media) {
+            this._media = media;
+        }
+        return this._media;
+    },
+
+    /**
      * Attach a stream to the Peer Connection
      * @param {Object} stream the Stream to attach
      *
@@ -176,7 +201,18 @@ PeerConnection.prototype = {
     detach: function(stream) {
         if(stream) {
             Sonotone.log("PEERCONNECTION", "Detach a stream to the Peer Connection <" + this._id + ">");
-            if(this._peer.getStreamById(stream.id) !== null) {
+            
+            var streams = this._peer.getLocalStreams(),
+            exist = false;
+            for (var i=0;i< streams.length;i++) {
+                if(streams[i].id === stream.id) {
+                    exist = true;
+                }
+            }            
+
+            //As getStreamById is not yet implemented in Firefox, we should use the getLocalStreams method
+            //if(this._peer.getStreamById(stream.id) !== null) {
+            if(exist) {
                 this._peer.removeStream(stream);    
             }
         }

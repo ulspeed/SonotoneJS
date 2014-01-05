@@ -23,11 +23,13 @@ RemoteMedia.prototype = {
     
     /**
      * Get or set the remote Stream
-     *
+     * @param {Object} stream The remote Stream
+     * @param {String} peerID The PeerConnection on which the remote Stream is attached
+     * @param {String} mediaType The Media (video or screen)
      * @api public
      */
 
-    stream: function(stream, peerID) {
+    stream: function(stream, peerID, mediaType) {
         if(stream !== null) {
             if(this._stream[peerID] !== null) {
                 Sonotone.log("REMOTEMEDIA", "Stream already exists. Add again to the Remote Media for peer <" + peerID + ">");
@@ -36,8 +38,13 @@ RemoteMedia.prototype = {
                 Sonotone.log("REMOTEMEDIA", "Set the stream associated to this Remote Media for peer <" + peerID + ">");
             }
             this._stream[peerID] = stream;
-            this._subscribeToStreamEvent(stream, peerID); 
-            this._callbacks.trigger('onRemoteStreamStarted', peerID);
+
+            //Get the userID (= peerID without the media)
+            var id = peerID.substring(1);
+
+            this._subscribeToStreamEvent(stream, id, mediaType);
+
+            this._callbacks.trigger('onRemoteStreamStarted', {id: id, media: mediaType});
         }
 
         return this._stream;
@@ -74,8 +81,17 @@ RemoteMedia.prototype = {
      * @api public
      */
 
-    renderStream: function(HTMLMediaElement, peerID) {
-        Sonotone.log("REMOTEMEDIA", "Render the remote stream associated to peer <" + peerID + ">"); 
+    renderStream: function(HTMLMediaElement, id, media) {
+        
+        var flag = media.substring(0,1),
+        peerID = flag + id;
+
+        if(media === "video") {
+            Sonotone.log("REMOTEMEDIA", "Render the video stream associated to peer <" + peerID + ">"); 
+        }
+        else {
+            Sonotone.log("REMOTEMEDIA", "Render the screen stream associated to peer <" + peerID + ">"); 
+        }
         this._adapter.attachToMedia(HTMLMediaElement, this._stream[peerID]);
     },
 
@@ -85,7 +101,7 @@ RemoteMedia.prototype = {
      * @api private
      */
 
-    _subscribeToStreamEvent: function(stream, peerID) {
+    _subscribeToStreamEvent: function(stream, id, media) {
 
         var that = this;
 
@@ -93,7 +109,7 @@ RemoteMedia.prototype = {
             Sonotone.log("REMOTEMEDIA", "Remote Stream has ended"); 
             //TODO
             //Perahps we have to remove the MediaTrack that ended
-            that._callbacks.trigger('onRemoteStreamEnded', peerID);
+            that._callbacks.trigger('onRemoteStreamEnded', {id: id, media: media});
         };
 
         stream.onaddtrack = function() {

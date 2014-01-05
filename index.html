@@ -16,8 +16,10 @@
 </head>
 <body onload="initialize();">
     <video id="localVideo" autoplay="true" style="width:160px; height:120px;"></video>
-    <video id="screenVideo" autoplay="true" style="width:160px; height:120px;"></video>
-    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:320px;height:240px"></video>
+    <video id="localScreen" autoplay="true" style="width:160px; height:120px;"></video>
+    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:160px;height:120px"></video>
+    <video id="remoteScreen" autoplay="true" style="margin-left:5px;width:160px;height:120px"></video>
+
     <p></p>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="share();">Share my Screen</button>
@@ -243,7 +245,7 @@
         };
 
         function onLocalScreenStreamStarted(stream) {
-            sono.localMedia().renderScreenStream(document.getElementById('screenVideo'));
+            sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
             isSharing = true;
         }
 
@@ -253,7 +255,7 @@
         };
 
         function onLocalScreenStreamEnded() {
-            document.getElementById('screenVideo').src = '';
+            document.getElementById('localScreen').src = '';
             isSharing = false;
         }
 
@@ -261,8 +263,14 @@
             // can't get local stream
         };
 
-        function onRemoteStreamStarted(id) {
-            sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), id);
+        function onRemoteStreamStarted(msg) {
+          console.log("MSG", msg);
+            if(msg.media === "video") {
+              sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), msg.id, msg.media);  
+            }
+            else {
+              sono.remoteMedia().renderStream(document.getElementById('remoteScreen'), msg.id, msg.media);   
+            }
         };
 
         function onRemoteStreamEnded() {

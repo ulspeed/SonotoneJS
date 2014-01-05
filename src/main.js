@@ -41,14 +41,6 @@ Sonotone.ID = new Date().getTime();
 Sonotone.debug = false;
 
 /**
- * Activate or not STUN
- * enableSTUN = false when using in an internal LAN
- * enableSTUN = true otherwise
- */
-
-Sonotone.enableSTUN = true;
-
-/**
  * Logger
  *
  * @api private
@@ -79,38 +71,6 @@ Sonotone.log = function(cat, msg, arg) {
         }
     }
 };
-
-/**
- * Adapter function for Mozilla and Chrome
- *
- * Chrome 28+
- * Firefox 22+
- */
-
-/*
-
-Sonotone.adapter = function() {
-
-    if(navigator.mozGetUserMedia && window.mozRTCPeerConnection) {
-        // Firefox
-
-        Sonotone.STUN = {"iceServers": [{"url": "stun:stun.services.mozilla.com"}]};
-
-    }
-    else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
-        // Chrome: can make call or Sharing
-
-        Sonotone.STUN = {
-            iceServers: [
-                {
-                    url: "stun:stun.l.google.com:19302"
-                }
-            ]
-        };
-    }
-};
-
-*/
 
 /**
 * Merge media constraints

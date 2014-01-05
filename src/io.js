@@ -25,6 +25,8 @@ var IO = Sonotone.IO = function(id, stunConfig, turnConfig) {
      * @api public
      */
 
+    //Firefox (STUN) = {"iceServers": [{"url": "stun:stun.services.mozilla.com"}]};
+    //Google (STUN) = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
     Sonotone.stunConfig = stunConfig;
 
     /**
@@ -704,8 +706,8 @@ IO.prototype = {
         peer.on('onRemoteStreamReceived', function(event) {
 
             Sonotone.log("SONOTONE.IO", "Create the Remote Media with this remote stream received");
-
-            this._remoteMedia.stream(event.stream, peer.ID());
+            console.log("PPPPPPPP>>>", peer.media());
+            this._remoteMedia.stream(event.stream, peer.ID(), peer.media());
 
         }, this);
 
@@ -756,7 +758,7 @@ IO.prototype = {
 
                     if(streams.length > 0) {
                         // Store this new remote media associated to this peer Connection
-                        this._remoteMedia.stream(streams[0], peer.ID());
+                        this._remoteMedia.stream(streams[0], peer.ID(), peer.media());
                     }
                     break;
 
