@@ -418,21 +418,27 @@ LocalMedia.prototype = {
 
             var s = e.currentTarget;
 
+            Sonotone.log("LOCALMEDIA", "A local track has ended", s.id);
+
             if(that._streamVideo) {
                 if(s.id === that._streamVideo.id) {
                     // It concerns the camera
                     Sonotone.log("LOCALMEDIA", "Local Video Stream has ended");
                     that._callbacks.trigger('onLocalVideoStreamEnded');
+                    that._streamVideo = null;
+                    that._isCameraCaptured = false;
                 }
                 else {
                     Sonotone.log("LOCALMEDIA", "Unknow ended stream");
                 }    
             }
-            else if (that._streamScreen) {
+            if (that._streamScreen) {
                 if(s.id === that._streamScreen.id) {
                     // It concerns the screen
                     Sonotone.log("LOCALMEDIA", "Local Screen Stream has ended");
                     that._callbacks.trigger('onLocalScreenStreamEnded');
+                    that._streamScreen = null;
+                    that._isScreenCaptured = false;
                 }
                 else {
                     Sonotone.log("LOCALMEDIA", "Unknow ended stream");

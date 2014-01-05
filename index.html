@@ -264,7 +264,6 @@
         };
 
         function onRemoteStreamStarted(msg) {
-          console.log("MSG", msg);
             if(msg.media === "video") {
               sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), msg.id, msg.media);  
             }
@@ -273,8 +272,13 @@
             }
         };
 
-        function onRemoteStreamEnded() {
-            document.getElementById('remoteVideo').src = '';
+        function onRemoteStreamEnded(msg) {
+            if(msg.media === 'video') {
+              document.getElementById('remoteVideo').src = '';
+            }
+            else {
+              document.getElementById('remoteScreen').src = ''; 
+            }
         };        
 
         function onErrorReceived(error) {
