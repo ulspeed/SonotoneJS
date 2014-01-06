@@ -31,8 +31,10 @@
     <button type="button" onclick="callScreen();">ScreenCall a Peer</button>
     <button type="button" onclick="endScreen();">Stop Screen</button>
     <br>
-    <button type="button" onclick="mute();">Mute</button>
-    <button type="button" onclick="unmute();">Unmute</button>
+    <button type="button" onclick="muteVideo();">Mute Video</button>
+    <button type="button" onclick="unmuteVideo();">Unmute Video</button>
+    <button type="button" onclick="muteScreen();">Mute Screen</button>
+    <button type="button" onclick="unmuteScreen();">Unmute Screen</button>
     <br>
     <button type="button" onclick="stopCall();">Release Call</button>
     <br>
@@ -125,12 +127,12 @@
 
         function stopVideo() {
             var id = users[0].id;
-            console.log("coucou");
             sono.release(id, 'video');
         };
 
-        function endSCreen() {
-          sono.releaseScreen();
+        function endScreen() {
+          var id = users[0].id;
+          sono.release(id, 'screen');
         }
 
         function callVideo() {
@@ -144,88 +146,95 @@
         }
 
         function removeVideoToCall() {
-         var id = users[0].id;
+          var id = users[0].id;
           sono.removeVideoFromCall(id); 
         }
 
         function callScreen() {
           var id = users[0].id;
-            sono.call(id, 'screen', false);
+          sono.call(id, 'screen', false);
         }
 
         function call2() {
-            sono.call(users[1].id);
+          sono.call(users[1].id);
         };
 
         function call3() {
-            sono.call(users[2].id);
+          sono.call(users[2].id);
         };
 
         function broadcast() {
-            sono.broadcastCall(users);
+          sono.broadcastCall(users);
         };
 
         function sendAMessage() {
-            sono.sendMessage(
-                {
-                    data: {
-                        msg: new Date().getTime().toString(), 
-                        type: 'data'
-                    }, 
-                    recipient: 'all'
-                }
-            );
+          sono.sendMessage(
+              {
+                  data: {
+                      msg: new Date().getTime().toString(), 
+                      type: 'data'
+                  }, 
+                  recipient: 'all'
+              }
+          );
         };
 
         function share() {
-            
-            sono.localMedia().acquireScreen();
+          sono.localMedia().acquireScreen();
         };
 
         function stats() {
-            sono.setStats();
+          sono.setStats();
         };
 
         function stopStats() {
-            sono.stopStats();
+          sono.stopStats();
         };
 
-        function mute() {
-            document.getElementById('localVideo').setAttribute('muted', 'muted');
-            sono.mute(users[0].id, true, true);
+        function muteVideo() {
+          document.getElementById('localVideo').setAttribute('muted', 'muted');
+          sono.mute(users[0].id, "video");
         };
 
-        function unmute() {
-            document.getElementById('localVideo').removeAttribute('muted');
-            sono.unmute(users[0].id, true, true);
+        function unmuteVideo() {
+          document.getElementById('localVideo').removeAttribute('muted');
+          sono.unmute(users[0].id, 'video');
         };
+
+        function muteScreen() {
+          sono.mute(users[0].id, 'screen');
+        };
+
+        function unmuteScreen() {
+          sono.unmute(users[0].id, 'screen');
+        }
 
 /* --------------- Callbacks ------------------ */
 
         function onTransportReady() {
-            console.log("Transport ready");
+          console.log("Transport ready");
         };
 
         function onTransportClose() {
-            console.log("Transport closed");
+          console.log("Transport closed");
         };
 
         function onTransportMessage(msg) {
-            console.log("Transport message", msg);
+          console.log("Transport message", msg);
         };
 
         function onTransportError(msg) {
-            console.log("Transport error", msg);
+          console.log("Transport error", msg);
         };
 
         function onPeerConnected(user) {
-            users.push(user);
-            console.log("New User:" + user.id + " (" + users.length + " connected users)");
+          users.push(user);
+          console.log("New User:" + user.id + " (" + users.length + " connected users)");
         };
 
         function onCallOffered(msg) {
-            console.log("ON CALL OFFERED:", msg);
-            sono.answer(msg.id);  
+          console.log("ON CALL OFFERED:", msg);
+          sono.answer(msg.id);  
         };
 
         function onCallAnswered(msg) {
@@ -237,49 +246,49 @@
         };
 
         function onCallEnded(msg) {
-            console.log("ON CALL ENDED:", msg);
-            if(msg.media === 'video') {
-              document.getElementById('remoteVideo').src = '';
-            }
-            else {
-              document.getElementById('remoteScreen').src = '';  
-            }
+          console.log("ON CALL ENDED:", msg);
+          if(msg.media === 'video') {
+            document.getElementById('remoteVideo').src = '';
+          }
+          else {
+            document.getElementById('remoteScreen').src = '';  
+          }
         };
 
         function onPeerDisconnected(msg) {
-            console.log("User to remove: ", msg.id);
-            var indexToRemove = -1;
+          console.log("User to remove: ", msg.id);
+          var indexToRemove = -1;
 
-            for (var i=0; i < users.length; i++) {
-                if(users[i].id === msg.id) {
-                    indexToRemove = i;
-                }
+          for (var i=0; i < users.length; i++) {
+            if(users[i].id === msg.id) {
+              indexToRemove = i;
             }
-            if(indexToRemove > -1) {
-                var removed = users.splice(indexToRemove, 1);
-                removed = null;
-            }
-            console.log(users.length + " users remains");
+          }
+          if(indexToRemove > -1) {
+            var removed = users.splice(indexToRemove, 1);
+              removed = null;
+          }
+          console.log(users.length + " users remains");
         };
 
         function onLocalStreamStarted(stream) {
-            sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
-            isVideo = true;
+          sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
+          isVideo = true;
         };
 
         function onLocalScreenStreamStarted(stream) {
-            sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
-            isSharing = true;
-        }
+          sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
+          isSharing = true;
+        };
 
         function onLocalStreamEnded() {
-            document.getElementById('localVideo').src = '';
-            isVideo = false;
+          document.getElementById('localVideo').src = '';
+          isVideo = false;
         };
 
         function onLocalScreenStreamEnded() {
-            document.getElementById('localScreen').src = '';
-            isSharing = false;
+          document.getElementById('localScreen').src = '';
+          isSharing = false;
         }
 
         function onLocalStreamError(err) {
@@ -287,8 +296,8 @@
         };
 
         function onRemoteStreamStarted(msg) {
-            if(msg.media === "video") {
-              sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), msg.id, msg.media);  
+          if(msg.media === "video") {
+            sono.remoteMedia().renderStream(document.getElementById('remoteVideo'), msg.id, msg.media);  
             }
             else {
               sono.remoteMedia().renderStream(document.getElementById('remoteScreen'), msg.id, msg.media);   
@@ -306,8 +315,6 @@
 
         function onErrorReceived(error) {
         };
-
-        
 
         function onStats(event) {
             console.log("STATS:", event);

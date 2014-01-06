@@ -476,14 +476,32 @@ IO.prototype = {
         }
     },
 
-    mute: function(callee, audio, video) {
-        var peer = this.peerConnections(callee, null);
-        peer.createOffer(this.localMedia().isScreenCaptured(), {action: 'mute', audio: audio, video: video});
+    /**
+     * Mute a stream (video or screen)
+     * @param {String} callee The user ID to mute
+     * @param {String} media The media to mute
+     *
+     * @api public
+     */
+
+    mute: function(callee, media) {
+        var flag = media.substring(0, 1);
+        var peer = this.peerConnections(flag + callee);
+        peer.createOffer(this.localMedia().isScreenCaptured(), false, {action: 'mute'});
     },
 
-    unmute: function(callee, audio, video) {
-        var peer = this.peerConnections(callee, null);
-        peer.createOffer(this.localMedia().isScreenCaptured(), {action: 'unmute', audio: audio, video: video});      
+    /**
+     * Unmute a stream (video or screen)
+     * @param {String} callee The user to unmute
+     * @param {String} media The media to unmute
+     *
+     * @api public
+     */
+
+    unmute: function(callee, media) {
+        var flag = media.substring(0, 1);
+        var peer = this.peerConnections(flag + callee);
+        peer.createOffer(this.localMedia().isScreenCaptured(), false, {action: 'unmute'});      
     },
 
     /**

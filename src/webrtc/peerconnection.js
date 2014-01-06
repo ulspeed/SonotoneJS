@@ -280,6 +280,8 @@ PeerConnection.prototype = {
 
             this.offerPending = true;
 
+            var muted = false;
+
             var offerConstraints = {"optional": [], "mandatory": {}};
 
             var constraints = Sonotone.mergeConstraints(offerConstraints, sdpConstraints);
@@ -293,10 +295,11 @@ PeerConnection.prototype = {
                 if(fct) {
                     switch (fct.action) {
                         case 'mute':
-                            offerSDP = that.muteSDP(offerSDP, fct.audio, fct.video);
+                            offerSDP = that.muteSDP(offerSDP);
+                            muted = true;
                             break;
                         case 'unmute':
-                            offerSDP = that.unmuteSDP(offerSDP, fct.audio, fct.video);
+                            offerSDP = that.unmuteSDP(offerSDP);
                             break;
                         default:
                             break;
@@ -313,7 +316,8 @@ PeerConnection.prototype = {
                     caller: Sonotone.ID,
                     callee:  that._id.substring(1),
                     media: isForScreenSharing ? 'screen' : 'video',
-                    channel: withDataChannel
+                    channel: withDataChannel,
+                    muted: muted
                 };
 
                 that.offerPending = false;
@@ -586,7 +590,7 @@ PeerConnection.prototype = {
         clearInterval(this.statID);
     },
 
-    muteSDP: function(sd, muteAudio, muteVideo) {
+    muteSDP: function(sd) {
         Sonotone.log("PEERCONNECTION", "Mute PeerConnection <" + this._id + ">");
 
         // Split SDP into lines
@@ -594,37 +598,35 @@ PeerConnection.prototype = {
         var replaceVideo = false;
         var replaceAudio = false;
         var l = sdpLines.length;
-        
-        if(muteVideo) {
-            for(var i=0; i<l; i++) {
-            
-                if(sdpLines[i].search('m=video') !== -1) {
-                    replaceVideo = true;
-                    continue;
-                }
 
-                if(replaceVideo) {
-                    if(sdpLines[i].search('a=sendrecv') !== -1) {
-                        sdpLines[i] = 'a=recvonly';
-                        break;
-                    }
+        // Mute the audio stream        
+        for(var i=0; i<l; i++) {
+        
+            if(sdpLines[i].search('m=video') !== -1) {
+                replaceVideo = true;
+                continue;
+            }
+
+            if(replaceVideo) {
+                if(sdpLines[i].search('a=sendrecv') !== -1) {
+                    sdpLines[i] = 'a=recvonly';
+                    break;
                 }
             }
         }
 
-        if(muteAudio) {
-            for(var j=0; j<l; j++) {
-            
-                if(sdpLines[j].search('m=audio') !== -1) {
-                    replaceAudio = true;
-                    continue;
-                }
+        // Mute the video stream
+        for(var j=0; j<l; j++) {
+        
+            if(sdpLines[j].search('m=audio') !== -1) {
+                replaceAudio = true;
+                continue;
+            }
 
-                if(replaceAudio) {
-                    if(sdpLines[j].search('a=sendrecv') !== -1) {
-                        sdpLines[j] = 'a=recvonly';
-                        break;
-                    }
+            if(replaceAudio) {
+                if(sdpLines[j].search('a=sendrecv') !== -1) {
+                    sdpLines[j] = 'a=recvonly';
+                    break;
                 }
             }
         }
@@ -635,7 +637,7 @@ PeerConnection.prototype = {
 
     },
 
-    unmuteSDP: function(sd, unmuteAudio, unmuteVideo) {
+    unmuteSDP: function(sd) {
         Sonotone.log("PEERCONNECTION", "Unmute PeerConnection <" + this._id + ">");
 
         // Split SDP into lines
@@ -644,36 +646,32 @@ PeerConnection.prototype = {
         var replaceAudio = false;
         var l = sdpLines.length;
 
-        if(unmuteVideo) {
-            for(var i=0; i<l; i++) {
-            
-                if(sdpLines[i].search('m=video') !== -1) {
-                    replaceVideo = true;
-                    continue;
-                }
+        for(var i=0; i<l; i++) {
+        
+            if(sdpLines[i].search('m=video') !== -1) {
+                replaceVideo = true;
+                continue;
+            }
 
-                if(replaceVideo) {
-                    if(sdpLines[i].search('a=recvonly') !== -1) {
-                        sdpLines[i] = 'a=sendrecv';
-                        break;
-                    }
+            if(replaceVideo) {
+                if(sdpLines[i].search('a=recvonly') !== -1) {
+                    sdpLines[i] = 'a=sendrecv';
+                    break;
                 }
             }
         }
 
-        if(unmuteAudio) {
-            for(var j=0; j<l; j++) {
-            
-                if(sdpLines[j].search('m=audio') !== -1) {
-                    replaceAudio = true;
-                    continue;
-                }
+        for(var j=0; j<l; j++) {
+        
+            if(sdpLines[j].search('m=audio') !== -1) {
+                replaceAudio = true;
+                continue;
+            }
 
-                if(replaceAudio) {
-                    if(sdpLines[j].search('a=recvonly') !== -1) {
-                        sdpLines[j] = 'a=sendrecv';
-                        break;
-                    }
+            if(replaceAudio) {
+                if(sdpLines[j].search('a=recvonly') !== -1) {
+                    sdpLines[j] = 'a=sendrecv';
+                    break;
                 }
             }
         }
