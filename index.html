@@ -454,27 +454,97 @@ You can configure and connect to your server in one line of code
 
 <h4>sono.call()</h4>
 
-<p>!!! TODO</p>
+<p>This method is used to call an other user either by "audio/video", either by using the "Screen Sharing" if your browser is compliant.</p>
+
+<pre><code>sono.call(String userID, String media);</code></pre>
+
+<p>the <code>userID</code> is identifier of an other user (given when you have instantiated the <code>sono.io</code> object). The media can be 'video' or 'screen'.</p>
+
+<pre><code>sono.call('123456', 'video'); // Start a call using audio and video
+
+sono.call('123456', 'screen'); // Start a call using the screen sharing</code></pre>
+
+<p> At the same time, you can call a user in 'audio/video' and share your screen with him.</p>
+
+<p>Events <code>'onCallOffered'</code> and <code>'onCallAnswered'</code> and sent respectively to the recipient of the call and to the issuer.</p>
 
 
 <h4>sono.answer()</h4>
 
-<p>!!! TODO</p>
+<p>When you are notified of a new call (which means when you received the 'onCallOffered'), you can answer to this call by using the <code>answer()</code> method.</p>
+
+<pre><code>sono.answer(String userID)</code></pre>
+
+<p>The <code>userID</code> to use and the <code>media</code> received are given by the 'onCallOffered' event</p>
+
+<pre><code>function onCallOffered(msg) {
+  sono.answer(msg.id);  
+};</code></pre>
+
+<p>That's all! Sonotone will automatically manages for you the 'audio/video' stream received or the 'screen' stream.</p>
 
 
 <h4>sono.release()</h4>
 
-<p>!!! TODO</p>
+<p>This method is used when you want to release a call ('audio/video' or 'screen-sharing').</p>
+
+<pre><code>sono.release(String userID, String media)</pre></code>
+
+<p>The <code>userID</code> and the <code>media</code> are given by the 'onCallOffered' method.</p>
+
+<pre><code>sono.release('123456', 'video'); //To stop an 'audio/video' call with a user
+
+sono.release('123456', 'screen'); //To stop a screen sharing call with a user</code></pre>
 
 
 <h4>sono.addVideoToCall()</h4>
 
-<p>!!! TODO</p>
+<p>When you receive a call, you're perhaps not sharing your video. But you can answer this call. In that case, you will receive the video of the other participant, but he will receive nothing.</p>
+
+<p>This method is to use when you are ready to share your screen. This will add your video stream to the existing call</p>
+
+<pre><code>sono.addVideoToCall(String usedID);</code></pre>
+
+<p>You have only to provide the identifiant of the user you want to share your video with.</p>
+
+<pre><code>sono.addVideoToCall('123456');</code></pre>
 
 
 <h4>sono.removeVideoFromCall()</h4>
 
-<p>!!! TODO</p>
+<p>This method can be used if you want to stop sending your video to a user but not stopping the call</p>
+
+<pre><code>sono.removeVideoFromCall(String userID)</code></pre>
+
+<p>You have only to provide the identifiant of the user you want to remove your video from.</p>
+
+<pre><code>sono.removeVideoFromCall('123456');</code></pre>
+
+
+<h4>sono.mute()</h4>
+
+<p>This method can be used each time you want to mute your 'audio/video' or 'screen-sharing' stream.</p>
+
+<pre><code>sono.mute(String userID, String media);</code></pre>
+
+<p>You have to provide the identifiant of the user for which you want to mute your stream and the media to mute.</p>
+
+<pre><code>sono.mute('123456', 'video'); // To mute your video stream with the user '123456'
+
+sono.mute('123456', 'screen'); // To mute your screen-sharing session with the user '123456'</code></pre>
+
+
+<h4>sono.unmute()</h4>
+
+<p>This method has to be used when you want to unmute your 'audio/video' stream or your 'screen-sharing' stream</p>
+
+<pre><code>sono.unmute(String userID, String media);</code></pre>
+
+<p>You have to provide the identifiant of the user for which you want to unmute your stream and the media to unmute.</p>
+
+<pre><code>sono.unmute('123456', 'video'); // To unmute your video stream with the user '123456'
+
+sono.unmute('123456', 'screen'); // To unmute your screen-sharing session with the user '123456'</code></pre>
 
 
 <h4>sono.sendChatMessage()</h4>
