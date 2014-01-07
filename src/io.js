@@ -310,8 +310,26 @@ IO.prototype = {
 
     removeVideoFromCall: function(callee) {
         var peer = this.peerConnections("v" + callee);
-        peer.detach(this.localMedia().streamVideo());   
-     },
+        peer.detach(this.localMedia().streamVideo(), true);   
+    },
+
+    /**
+     * Check if there is a video call with a user
+     * @param {String} callee The user to check
+     *
+     * @api public
+     */
+
+    isVideoReceivedFrom: function(callee) {
+        var peerID =  'v' + callee;
+        if(peerID in this._peerConnections) {
+            var peer = this._peerConnections[peerID];
+            return peer.isStreamConnected();
+        }
+        else {
+            return false;
+        }
+    },
 
     /**
      * Add data channel to a peer connection
@@ -375,10 +393,11 @@ IO.prototype = {
         var withDataChannel = this._tmpOffer.channel;
         var peer = this.peerConnections(m + caller, withDataChannel);
         var isForScreenSharing = this._tmpOffer.media === 'video' ? false : true;
+        var blockVideo = peer.isLocalStreamBlocked() || doNotSendLocalVideo;
 
         switch (this._tmpOffer.media) {
             case 'video':
-                if(this.localMedia().isCameraCaptured() && !doNotSendLocalVideo) {
+                if(this.localMedia().isCameraCaptured() && !blockVideo) {
                     peer.attach(this.localMedia().streamVideo());    
                 }
                 break;

@@ -41,6 +41,8 @@
     <button type="button" onclick="stats();">Stats</button>
     <button type="button" onclick="stopStats();">Stop Stats</button>
     <br>
+    <button type="button" onclick="isInVideo();">Received Video ?</button>
+    <br>
 
     <button type="button" onclick="call2();">Call 2nd Peer</button>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
@@ -112,7 +114,8 @@
 
         };
 
-/* --------------- Features ---------------- */
+/* --------------- Video Features ---------------- */
+
 
         function startVideo() {
 
@@ -124,16 +127,6 @@
 
             sono.localMedia().acquire(constraints);
         };
-
-        function stopVideo() {
-            var id = users[0].id;
-            sono.release(id, 'video');
-        };
-
-        function endScreen() {
-          var id = users[0].id;
-          sono.release(id, 'screen');
-        }
 
         function callVideo() {
           var id = users[0].id;
@@ -150,22 +143,55 @@
           sono.removeVideoFromCall(id); 
         }
 
+        function isInVideo() {
+          var id = users[0].id;
+          console.log("Is in Video=" + sono.isVideoReceivedFrom(id));  
+        }
+
+        function stopVideo() {
+            var id = users[0].id;
+            sono.release(id, 'video');
+        };
+
+        function muteVideo() {
+          document.getElementById('localVideo').setAttribute('muted', 'muted');
+          sono.mute(users[0].id, "video");
+        };
+
+        function unmuteVideo() {
+          document.getElementById('localVideo').removeAttribute('muted');
+          sono.unmute(users[0].id, 'video');
+        };
+
+
+/* --------------- Screen Features ---------------- */
+
+
+        function share() {
+          sono.localMedia().acquireScreen();
+        };
+
+        function endScreen() {
+          var id = users[0].id;
+          sono.release(id, 'screen');
+        }
+
         function callScreen() {
           var id = users[0].id;
           sono.call(id, 'screen', false);
         }
 
-        function call2() {
-          sono.call(users[1].id);
+        function muteScreen() {
+          sono.mute(users[0].id, 'screen');
         };
 
-        function call3() {
-          sono.call(users[2].id);
-        };
+        function unmuteScreen() {
+          sono.unmute(users[0].id, 'screen');
+        }
 
-        function broadcast() {
-          sono.broadcastCall(users);
-        };
+
+/* --------------- Chat & Message Features ---------------- */
+
 
         function sendAMessage() {
           sono.sendMessage(
@@ -179,9 +205,9 @@
           );
         };
 
-        function share() {
-          sono.localMedia().acquireScreen();
-        };
+
+/* --------------- Stats Features ---------------- */
+
 
         function stats() {
           sono.setStats();
@@ -191,25 +217,30 @@
           sono.stopStats();
         };
 
-        function muteVideo() {
-          document.getElementById('localVideo').setAttribute('muted', 'muted');
-          sono.mute(users[0].id, "video");
-        };
-
-        function unmuteVideo() {
-          document.getElementById('localVideo').removeAttribute('muted');
-          sono.unmute(users[0].id, 'video');
-        };
-
-        function muteScreen() {
-          sono.mute(users[0].id, 'screen');
-        };
-
-        function unmuteScreen() {
-          sono.unmute(users[0].id, 'screen');
+        function onStats(event) {
+            console.log("STATS:", event);
+            
         }
 
-/* --------------- Callbacks ------------------ */
+
+/* --------------- Others Features ---------------- */
+
+
+        function call2() {
+          sono.call(users[1].id);
+        };
+
+        function call3() {
+          sono.call(users[2].id);
+        };
+
+        function broadcast() {
+          sono.broadcastCall(users);
+        };
+
+
+/* --------------- Transport Callbacks ------------------ */
+
 
         function onTransportReady() {
           console.log("Transport ready");
@@ -227,10 +258,34 @@
           console.log("Transport error", msg);
         };
 
+
+/* --------------- Peers Callbacks ------------------ */
+
+
         function onPeerConnected(user) {
           users.push(user);
           console.log("New User:" + user.id + " (" + users.length + " connected users)");
         };
+
+        function onPeerDisconnected(msg) {
+          console.log("User to remove: ", msg.id);
+          var indexToRemove = -1;
+
+          for (var i=0; i < users.length; i++) {
+            if(users[i].id === msg.id) {
+              indexToRemove = i;
+            }
+          }
+          if(indexToRemove > -1) {
+            var removed = users.splice(indexToRemove, 1);
+              removed = null;
+          }
+          console.log(users.length + " users remains");
+        };
+
+
+/* --------------- Call Callbacks ------------------ */
+
 
         function onCallOffered(msg) {
           console.log("ON CALL OFFERED:", msg);
@@ -255,22 +310,10 @@
           }
         };
 
-        function onPeerDisconnected(msg) {
-          console.log("User to remove: ", msg.id);
-          var indexToRemove = -1;
+  
+  /* --------------- Stream Callbacks ------------------ */      
 
-          for (var i=0; i < users.length; i++) {
-            if(users[i].id === msg.id) {
-              indexToRemove = i;
-            }
-          }
-          if(indexToRemove > -1) {
-            var removed = users.splice(indexToRemove, 1);
-              removed = null;
-          }
-          console.log(users.length + " users remains");
-        };
-
+        
         function onLocalStreamStarted(stream) {
           sono.localMedia().renderVideoStream(document.getElementById('localVideo'));
           isVideo = true;
@@ -313,13 +356,7 @@
             }
         };        
 
-        function onErrorReceived(error) {
-        };
-
-        function onStats(event) {
-            console.log("STATS:", event);
-            
-        }
+        
     </script>
 </body>
 </html>

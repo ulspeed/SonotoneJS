@@ -34,6 +34,10 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this.isConnected = false;
 
+    this._streamConnected = false;
+
+    this._streamForcedDetached = true;
+
     this.statID = '';
 
     this._adapter = adapter;
@@ -67,12 +71,14 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     this._peer.onaddstream = function(event) {
         Sonotone.log("PEERCONNECTION", "Remote stream added from PEER CONNECTION <" + that._id + ">");
         that._callbacks.trigger('onRemoteStreamReceived', event);
+        that._streamConnected = true;
     };
 
     // Chrome - Firefox
     this._peer.onremovestream = function(event) {
         Sonotone.log("PEERCONNECTION", "Remote stream removed from PEER CONNECTION <" + that._id + ">");
-        that._callbacks.trigger('onRemoteStreamEnded', event);  
+        that._callbacks.trigger('onRemoteStreamEnded', event); 
+        that._streamConnected = false; 
     };
 
     // Chrome only
@@ -177,6 +183,8 @@ PeerConnection.prototype = {
                 }
             }
 
+            this._streamForcedDetached = false;
+
             //As getStreamById is not yet implemented in Firefox, we should use the getLocalStreams method
             //if(this._peer.getStreamById(stream.id) == null) {
             if(!alreadyAdded) {
@@ -194,11 +202,12 @@ PeerConnection.prototype = {
     /**
      * ID of the PeerConnection
      * @param {Object} stream The stream to detach
+     * @param {Object} forced True if forced by the user
      *
      * @api public
      */
 
-    detach: function(stream) {
+    detach: function(stream, forced) {
 
         if(stream) {
             Sonotone.log("PEERCONNECTION", "Detach a stream to the Peer Connection <" + this._id + ">");
@@ -216,6 +225,9 @@ PeerConnection.prototype = {
             if(exist && !stream.ended) {
                 this._peer.removeStream(stream);    
             }
+            if(forced) {
+                this._streamForcedDetached = true;
+            }
         }
         else {
             Sonotone.log("PEERCONNECTION", "No stream to remove");
@@ -231,6 +243,26 @@ PeerConnection.prototype = {
     ready: function() {
         return this._peerReady;
     },
+
+    /**
+     * Is the stream connected
+     *
+     * @api public
+     */
+
+    isStreamConnected: function() {
+        return this._streamConnected;
+    },
+
+    /**
+     * If a local Media stream exists, should it added to the peer (true if blocked)
+     *
+     * @api public
+     */
+
+     isLocalStreamBlocked: function() {
+        return this._streamForcedDetached;
+     },
 
     /**
      * Store the SDP into the Local Description of the peer
