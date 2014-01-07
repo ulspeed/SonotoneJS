@@ -38,6 +38,9 @@
     <br>
     <button type="button" onclick="stopCall();">Release Call</button>
     <br>
+    <button type="button" onclick="sendIMMessageToAll();">Send Public IM</button>
+    <button type="button" onclick="sendIMMessage();">Send Private IM</button>
+    <br>
     <button type="button" onclick="stats();">Stats</button>
     <button type="button" onclick="stopStats();">Stop Stats</button>
     <br>
@@ -48,7 +51,7 @@
     <button type="button" onclick="call2();">Call 2nd Peer</button>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
     <button type="button" onclick="broadcast();">Call all Peers</button>
-    <button type="button" onclick="sendAMessage();">SendMessage</button>
+    
     <footer id="footer">
     </footer>
     <script type="text/javascript" src="dist/sonotone.js"></script>
@@ -79,6 +82,7 @@
             sono.on('onPeerConnected', onPeerConnected, this);
             sono.on('onPeerAlreadyConnected', onPeerConnected, this);
             sono.on('onPeerDisconnected', onPeerDisconnected, this);
+            sono.on('onPeerIMMessage', onPeerIMMessage, this);
 
             // Listen to call
             sono.on('onCallOffered', onCallOffered, this);
@@ -209,6 +213,19 @@
                   recipient: 'all'
               }
           );
+        };
+
+        function onPeerIMMessage(msg) {
+          console.log("IM Message received", msg);
+        };
+
+        function sendIMMessageToAll() {
+          sono.sendIMMessage('Hello all peers !');
+        };
+
+        function sendIMMessage() {
+          var id = users[0].id;
+          sono.sendIMMessage('Hello ' + id, id);
         };
 
 

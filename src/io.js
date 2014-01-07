@@ -229,16 +229,17 @@ IO.prototype = {
      * @api public
      */
 
-    sendChatMessage: function(msg) {
+    sendIMMessage: function(msg, to) {
         if(this._transport) {
 
             var message = {
                 data: {
-                    type: 'chat',
-                    content: msg
+                    type: 'im',
+                    content: msg,
+                    private: to ? true: false
                 },
                 caller: Sonotone.ID,
-                callee: 'all'
+                callee: to || 'all'
             };
 
             this._transport.send(message);
@@ -595,8 +596,8 @@ IO.prototype = {
                             this._tmpCandidate.push(msg.data);
                         }
                         break;
-                    case 'chat':
-                         this._callbacks.trigger('onPeerChat', {id: msg.caller, content: msg.data.content});
+                    case 'im':
+                         this._callbacks.trigger('onPeerIMMessage', {id: msg.caller, content: msg.data.content, private: msg.data.private});
                         break;
                     case 'bye':
                         this._callbacks.trigger('onCallEnded', {id: msg.caller, media: msg.media});
