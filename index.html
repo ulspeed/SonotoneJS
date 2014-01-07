@@ -42,6 +42,7 @@
     <button type="button" onclick="stopStats();">Stop Stats</button>
     <br>
     <button type="button" onclick="isInVideo();">Received Video ?</button>
+    <button type="button" onclick="isInScreen();">Received Screen Sharing ?</button>
     <br>
 
     <button type="button" onclick="call2();">Call 2nd Peer</button>
@@ -145,7 +146,7 @@
 
         function isInVideo() {
           var id = users[0].id;
-          console.log("Is in Video=" + sono.isVideoReceivedFrom(id));  
+          console.log("Is in Video with " + id + ":" + sono.isVideoReceivedFrom(id));  
         }
 
         function stopVideo() {
@@ -187,6 +188,11 @@
 
         function unmuteScreen() {
           sono.unmute(users[0].id, 'screen');
+        };
+
+        function isInScreen() {
+          var id = users[0].id;
+          console.log("Is in Screen sharing with " + id + ":" + sono.isScreenReceivedFrom(id));  
         }
 
 

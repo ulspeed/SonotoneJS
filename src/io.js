@@ -332,6 +332,24 @@ IO.prototype = {
     },
 
     /**
+     * Is Screen sharing received from
+     * @param {String} callee The user to check
+     *
+     * @api public
+     */
+
+    isScreenReceivedFrom: function(callee) {
+        var peerID =  's' + callee;
+        if(peerID in this._peerConnections) {
+            var peer = this._peerConnections[peerID];
+            return peer.isStreamConnected();
+        }
+        else {
+            return false;
+        }
+    },
+
+    /**
      * Add data channel to a peer connection
      * @param {String} callee The callee
      *

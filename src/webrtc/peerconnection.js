@@ -195,7 +195,7 @@ PeerConnection.prototype = {
             }
         }
         else {
-            Sonotone.log("PEERCONNECTION", "No stream to add");
+            Sonotone.log("PEERCONNECTION", "No stream to add to the Peer Connection <" + this._id + ">");
         }
     },
 
@@ -230,7 +230,7 @@ PeerConnection.prototype = {
             }
         }
         else {
-            Sonotone.log("PEERCONNECTION", "No stream to remove");
+            Sonotone.log("PEERCONNECTION", "No stream to remove from the Peer Connection <" + this._id + ">");
         }
     },
 
@@ -272,7 +272,7 @@ PeerConnection.prototype = {
      */
 
     setLocalDescription: function(SDP) {
-        Sonotone.log("PEERCONNECTION", "Store the SDP parameters to the local description");
+        Sonotone.log("PEERCONNECTION", "Store the SDP parameters to the local description of Peer Connection <" + this._id + ">");
         this._peer.setLocalDescription(SDP);
     },
 
@@ -284,7 +284,7 @@ PeerConnection.prototype = {
      */
 
     setRemoteDescription: function(SDP) {
-        Sonotone.log("PEERCONNECTION", "Store the SDP parameters to the remote description");
+        Sonotone.log("PEERCONNECTION", "Store the SDP parameters to the remote description of Peer Connection <" + this._id + ">");
         this._peer.setRemoteDescription(SDP);
     },
 
@@ -318,7 +318,7 @@ PeerConnection.prototype = {
 
             var constraints = Sonotone.mergeConstraints(offerConstraints, sdpConstraints);
 
-            Sonotone.log("PEERCONNECTION", "Create the SDP offer", constraints);
+            Sonotone.log("PEERCONNECTION", "Create the SDP offer for Peer Connection <" + this._id + ">", constraints);
 
             var that = this;
         
@@ -357,7 +357,7 @@ PeerConnection.prototype = {
                 that._callbacks.trigger('onSDPOfferToSend', event);
 
             }, function(error) {
-                Sonotone.log("PEERCONNECTION", "Fail to create Offer", error);
+                Sonotone.log("PEERCONNECTION", "Fail to create Offer for Peer Connection <" + that._id + ">", error);
                 that.offerPending = false;
             }, constraints);
 
@@ -399,7 +399,7 @@ PeerConnection.prototype = {
             that._callbacks.trigger('onSDPAnswerToSend', event);
 
         }, function(error) {
-            Sonotone.log("PEERCONNECTION", "Fail to create Answer", error);
+            Sonotone.log("PEERCONNECTION", "Fail to create Answer for Peer Connection <" + that._id + ">", error);
         }, sdpConstraints);
 
         this.answerCreated = true;
