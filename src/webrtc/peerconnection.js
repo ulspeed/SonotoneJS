@@ -2,10 +2,11 @@
  * PeerConnection namespace.
  * @param {String} id The peerConnection ID to user
  * @param {Boolean} hasRemoteDataChannel True if the remote peer can use Data Channel
+ * @param {Object} caps The user capabilities
  * @namespace
  */
 
-var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChannel, adapter) {
+var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChannel, adapter, caps) {
 
     Sonotone.log("PEERCONNECTION", "Create new Peer Connection <" + id + ">");
 
@@ -17,12 +18,14 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this._id = id;
 
+    this._dataChannel = null;
+
     /**
      * Dedicated Media
      * Can be: video, screen data
      */
 
-    this._media = (id.substring(0, 1) === 'v') ? 'video' : 'screen';
+    this._media = (id.substring(0, 1) === 'v') ? 'video' : (id.substring(0, 1) === 's') ? 'screen' : 'data';
 
     this.isCaller = false;
 
@@ -40,21 +43,27 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this.statID = '';
 
+    this._caps = caps;
+
     this._adapter = adapter;
 
     Sonotone.log("PEERCONNECTION", "Use STUN Server", Sonotone.stunConfig);
 
     this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, this._adapter.RTCPeerConnectionConstraints(), this._adapter);
 
-    this._dataChannel = new Sonotone.IO.DataChannel(id, hasRemoteDataChannel, this._peer);
+    this.addDataChannel();
 
-    this._subscribeToDataChannelEvents();
+
+    if(hasRemoteDataChannel) {
+    }
 
     Sonotone.log("PEERCONNECTION", "PeerConnection created", this._peer);
 
     this._callbacks = new Sonotone.IO.Events();
 
     var that = this;
+
+    console.log("PEER", this._peer);
 
     // Chrome - Firefox
     this._peer.onicecandidate = function(event) {
@@ -126,6 +135,10 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     this._peer.onopen = function(event) {
         Sonotone.log("PEERCONNECTION", "On Open for PEER CONNECTION <" + that._id + ">", event);
         that._callbacks.trigger('onOpen', null);  
+    };
+
+    this._peer.ondatachannel = function(event) {
+        console.log("ONDATACHANNEL", event);
     };
 
     this._peerReady = true;
@@ -297,14 +310,14 @@ PeerConnection.prototype = {
      * @api public
      */ 
 
-    createOffer: function(isForScreenSharing, withDataChannel, fct) {
+    createOffer: function(media, withDataChannel, fct) {
 
         if(!this.offerPending) {
 
             var sdpConstraints = {
                 'mandatory': {
-                    'OfferToReceiveAudio': isForScreenSharing ? false : true,
-                    'OfferToReceiveVideo': isForScreenSharing ? false : true 
+                    'OfferToReceiveAudio': media === 'screen' ? false : true,
+                    'OfferToReceiveVideo': media === 'screen' ? false : true 
                 }
             };
 
@@ -347,7 +360,7 @@ PeerConnection.prototype = {
                     data: offerSDP,
                     caller: Sonotone.ID,
                     callee:  that._id.substring(1),
-                    media: isForScreenSharing ? 'screen' : 'video',
+                    media: media,
                     channel: withDataChannel,
                     muted: muted
                 };
@@ -366,16 +379,16 @@ PeerConnection.prototype = {
 
     /**
      * Create an SDP answer message
-     * @param {Boolean} isScreencaptured True if the screen has been captured
+     * @param {Boolean} media Media used in the offer
      *
      */
 
-    createAnswer: function(screenCaptured) {
+    createAnswer: function(media) {
 
         var sdpConstraints = {
             'mandatory': {
                 'OfferToReceiveAudio': true,
-                'OfferToReceiveVideo': true 
+                'OfferToReceiveVideo': true
             }
         };
                     
@@ -393,7 +406,7 @@ PeerConnection.prototype = {
                 data: answerSDP,
                 caller: Sonotone.ID,
                 callee: that._id.substring(1),
-                media: screenCaptured ? 'screen' : 'video'
+                media: media
             };
 
             that._callbacks.trigger('onSDPAnswerToSend', event);
@@ -466,6 +479,18 @@ PeerConnection.prototype = {
     },
 
     /**
+     * Add a Data Channel with the peer
+     *
+     * @api public
+     */
+
+     addDataChannel: function() {
+        this._dataChannel = new Sonotone.IO.DataChannel(this._id, this._peer, this._caps);
+
+        this._subscribeToDataChannelEvents();
+     },
+
+    /**
      * Send data using the Data Channel
      * @param {Object} data The data to send
      *
@@ -474,6 +499,17 @@ PeerConnection.prototype = {
 
     sendFile: function(file) {
         this._dataChannel.sendFile(file);
+    },
+
+    /**
+     * Send message using the DataChannel
+     * @param {Object} msg The message
+     *
+     * @api public
+     */
+
+    sendMessage: function(msg) {
+        this._dataChannel.sendData(msg);
     },
 
     /**

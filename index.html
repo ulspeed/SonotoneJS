@@ -48,7 +48,9 @@
     <button type="button" onclick="isInScreen();">Received Screen Sharing ?</button>
     <br>
 
-    <button type="button" onclick="call2();">Call 2nd Peer</button>
+    <button type="button" onclick="dataCall();">DataCall a Peer</button>
+    <button type="button" onclick="addDataChannel();">Add DataChannel</button>
+    <button type="button" onclick="sendData();">Send Data</button>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
     <button type="button" onclick="broadcast();">Call all Peers</button>
     
@@ -229,6 +231,7 @@
         };
 
 
+
 /* --------------- Stats Features ---------------- */
 
 
@@ -246,11 +249,22 @@
         }
 
 
+
 /* --------------- Others Features ---------------- */
 
+        function dataCall() {
+          var id = users[0].id;
+          sono.call(id, 'data');
+        };
 
-        function call2() {
-          sono.call(users[1].id);
+        function addDataChannel() {
+          var id = users[0].id;
+          sono.addDataToCall(id, 'video');
+        };
+
+        function sendData() {
+          var id = users[0].id;
+          sono.sendPeerMessage('Hello ' + id, id);
         };
 
         function call3() {

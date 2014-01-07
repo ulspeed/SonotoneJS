@@ -2,13 +2,13 @@
  * Data Channel
  * Manage the Data Channel part of the Peer Connection
  * @param {String} id The ID to use
- * @param {Boolean} hasRemoteDataChannel True if the remote peer can use Data-Channel
  * @param {Object} peer The parent peer where to add the Data Channel
+ * @param {Object} caps The user capabilities
  *
  * @namespace
  */
 
-var DataChannel = Sonotone.IO.DataChannel = function(id, hasRemoteDataChannel, peer) {
+var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps) {
     Sonotone.log("DATACHANNEL", "Data-Channel initialized");
 
     this._remotePeerID = id;
@@ -27,7 +27,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, hasRemoteDataChannel, p
 
     var that = this;
 
-    if(Sonotone.isDataChannelCompliant && hasRemoteDataChannel) {
+    if(caps.canUseDataChannel) {
         this._channel = peer.createDataChannel(id, { reliable : true });
 
         // When data-channel is opened with remote peer
@@ -51,7 +51,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, hasRemoteDataChannel, p
         // On new message received
         this._channel.onmessage = function(e){
 
-            //Sonotone.log("DATACHANNEL", "Received", e.data);
+            Sonotone.log("DATACHANNEL", "Received", e.data);
 
             if(e.data instanceof ArrayBuffer) {
                 //Sonotone.log("DATACHANNEL", "Type ArrayBuffer");
@@ -73,7 +73,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, hasRemoteDataChannel, p
                 try {
 
                     if(e.data.indexOf('{') === 0) {
-                        //Sonotone.log("DATACHANNEL", "Type SIG");
+                        Sonotone.log("DATACHANNEL", "Type SIG");
                         var jsonMessage = JSON.parse(e.data);
 
                         switch (jsonMessage.type) {
@@ -118,9 +118,6 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, hasRemoteDataChannel, p
     }
     else if(!Sonotone.isDataChannelCompliant) {
         Sonotone.log("DATACHANNEL", "Browser not compliant for Data-Sharing");
-    }
-    else {
-        Sonotone.log("DATACHANNEL", "Remote Peer browser is not compliant for Data-Sharing");
     }
 };
 

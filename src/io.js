@@ -78,13 +78,6 @@ var IO = Sonotone.IO = function(id, stunConfig, turnConfig) {
     this._remoteMedia = new Sonotone.IO.RemoteMedia(this._adapter);
 
     /**
-     * Adapter
-     *
-     * @api private
-     */
-     this._adapter = new Sonotone.IO.Adapter();
-
-    /**
      * List of created Peerconnections
      *
      * @api private
@@ -215,7 +208,7 @@ IO.prototype = {
     peerConnections: function(id) {
         if(this._peerConnections[id] === undefined) {
             Sonotone.log("SONOTONE.IO", "PeerConnections not found, create a new one...", id);
-            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id, false, this._adapter);
+            this._peerConnections[id] = new Sonotone.IO.PeerConnection(id, false, this._adapter, this.caps());
             this._subscribeToPeerConnectionEvent(this._peerConnections[id]);
         }
 
@@ -290,6 +283,11 @@ IO.prototype = {
         }
     },
 
+    sendPeerMessage: function(msg, callee) {
+        var peer = this.peerConnections("v" + callee);
+        peer.sendMessage(msg);
+    },
+
     /**
      * Add the local video stream to a Peer Connection
      * @param {String} callee The callee
@@ -353,12 +351,17 @@ IO.prototype = {
     /**
      * Add data channel to a peer connection
      * @param {String} callee The callee
+     * @param {String} media 'video', 'screen', 'data'
      *
      * @api public
      */
 
-    addDataChannelToPeer: function(callee) {
-        callee = null;
+    addDataToCall: function(callee, media) {
+        var m = media.substring(0,1);
+        var peer = this.peerConnections(m + callee);
+               
+        peer.addDataChannel();
+
     },
 
     /**
@@ -374,7 +377,6 @@ IO.prototype = {
 
         var m = media.substring(0,1);
         var peer = this.peerConnections(m + callee, withDataChannel);
-        var isForScreenSharing = false;
         
         switch (media) {
             case 'video':
@@ -386,7 +388,6 @@ IO.prototype = {
                 if(this.localMedia().isScreenCaptured()) {
                     peer.attach(this.localMedia().streamScreen());
                 }
-                isForScreenSharing = true;
                 break;
             case 'data':
                 //No other thing to do
@@ -395,7 +396,7 @@ IO.prototype = {
                 break;
 
         }
-        peer.createOffer(isForScreenSharing, withDataChannel, null);
+        peer.createOffer(media, withDataChannel, null);
     },
 
     /**
@@ -411,7 +412,6 @@ IO.prototype = {
         var m = this._tmpOffer.media.substring(0,1);
         var withDataChannel = this._tmpOffer.channel;
         var peer = this.peerConnections(m + caller, withDataChannel);
-        var isForScreenSharing = this._tmpOffer.media === 'video' ? false : true;
         var blockVideo = peer.isLocalStreamBlocked() || doNotSendLocalVideo;
 
         switch (this._tmpOffer.media) {
@@ -429,7 +429,7 @@ IO.prototype = {
         }
 
         peer.setRemoteDescription(this._adapter.RTCSessionDescription(this._tmpOffer.data));
-        peer.createAnswer(isForScreenSharing);
+        peer.createAnswer(this._tmpOffer.media);
 
     },
 
@@ -708,6 +708,10 @@ IO.prototype = {
         }
     },
 
+    _getMediaUsed: function(peer) {
+        return peer.ID().substring(0,1) === 'v' ? 'video' : peer.ID().substring(0,1) === 's' ? 'screen' : 'data';
+    },
+
     /**
      * Subscribe to PeerConnection event
      * @param {Object} peer The PeerConnection to subscribe
@@ -730,7 +734,7 @@ IO.prototype = {
                     },
                     caller: Sonotone.ID,
                     callee: peer.ID().substring(1),
-                    media: peer.ID().substring(0,1) === 'v' ? 'video' : 'screen'
+                    media: this._getMediaUsed(peer)
                 };
 
                 this._transport.send(message);
@@ -834,7 +838,7 @@ IO.prototype = {
 
         // A change has been made that need a renegotiation
         peer.on('onNegotiationNeeded', function() {
-            peer.createOffer(false);
+            peer.createOffer(this._getMediaUsed(peer), false, null);
         }, this);
 
         // Listen to Answer to send
