@@ -51,6 +51,10 @@
     <button type="button" onclick="dataCall();">DataCall a Peer</button>
     <button type="button" onclick="addDataChannel();">Add DataChannel</button>
     <button type="button" onclick="sendData();">Send Data</button>
+    <br>
+    <input type="file" id="fileElt">
+    <button type="button" onclick="sendFile();">Send File</button>
+    <br>
     <button type="button" onclick="call3();">Call 3rd Peer</button>
     <button type="button" onclick="broadcast();">Call all Peers</button>
     
@@ -85,6 +89,7 @@
             sono.on('onPeerAlreadyConnected', onPeerConnected, this);
             sono.on('onPeerDisconnected', onPeerDisconnected, this);
             sono.on('onPeerIMMessage', onPeerIMMessage, this);
+            sono.on('onPeerFileReceived', onPeerFileReceived, this);
 
             // Listen to call
             sono.on('onCallOffered', onCallOffered, this);
@@ -266,6 +271,18 @@
           sono.sendPeerMessage('Hello ' + id, id);
         };
 
+        function sendFile() {
+          var id = users[0].id;
+          var fileList = fileElt.files;
+          sono.sendFile(fileList[0], id);
+        };
+
+        function onPeerFileReceived(msg) {
+          console.log("RECEIVED:", msg);
+
+          SaveToDisk(msg.data.content, msg.data.info.fileName);
+        };
+
         function call3() {
           sono.call(users[2].id);
         };
@@ -390,7 +407,23 @@
             else {
               document.getElementById('remoteScreen').src = ''; 
             }
-        };        
+        };    
+
+        function SaveToDisk(blobURL, fileName) {
+            var reader = new FileReader();
+            reader.readAsDataURL(blobURL);
+            reader.onload = function (event) {
+                var save = document.createElement('a');
+                save.href = event.target.result;
+                save.target = '_blank';
+                save.download = fileName || 'unknown file';
+
+                var event = document.createEvent('Event');
+                event.initEvent('click', true, true);
+                save.dispatchEvent(event);
+                (window.URL || window.webkitURL).revokeObjectURL(save.href);
+            };
+        }    
 
         
     </script>

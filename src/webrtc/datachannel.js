@@ -58,7 +58,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
         // On new message received
         this._channel.onmessage = function(e){
 
-            Sonotone.log("DATACHANNEL", "Message received by PeerConnection <" + id + ">", e.data);
+            //Sonotone.log("DATACHANNEL", "Message received by PeerConnection <" + id + ">", e.data);
 
             if(e.data instanceof ArrayBuffer) {
                 //Sonotone.log("DATACHANNEL", "Type ArrayBuffer");
@@ -66,7 +66,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
                 that._file.push(blob);
 
                 var ack =  {
-                    type: "ACK"
+                    type: "FILE_ACK"
                 };
                 //Sonotone.log("DATACHANNEL", "Send ACK");
                 that._channel.send(JSON.stringify(ack));
@@ -80,7 +80,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
                 try {
 
                     if(e.data.indexOf('{') === 0) {
-                        Sonotone.log("DATACHANNEL", "Type SIG");
+                        //Sonotone.log("DATACHANNEL", "Type SIG");
                         var jsonMessage = JSON.parse(e.data);
 
                         switch (jsonMessage.type) {
@@ -99,7 +99,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
 
                                 that._callbacks.trigger('onFileReceived', file); 
                                 break;
-                            case "ACK":
+                            case "FILE_ACK":
                                 //Sonotone.log("DATACHANNEL", "Received ACK");
                                 if(that._remainingBlob.size) {
                                     //Sonotone.log("DATACHANNEL", "Continue to send remaining file part");
@@ -166,7 +166,7 @@ DataChannel.prototype = {
 
     /**
      * Send data using this Channel
-     * @param {Object} data The data to send
+     * @param {Object} file The file to send
      *
      * @api public
      */

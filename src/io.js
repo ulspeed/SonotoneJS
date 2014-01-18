@@ -59,7 +59,7 @@ var IO = Sonotone.IO = function(id, stunConfig, turnConfig) {
      *
      * @api private
      */
-     this._adapter = new Sonotone.IO.Adapter();
+    this._adapter = new Sonotone.IO.Adapter();
 
     /**
      * Local stream
@@ -275,7 +275,7 @@ IO.prototype = {
         var peer = null;
 
         if(callee) {
-            peer = this.peerConnections(callee);
+            peer = this.peerConnections("d" + callee);
             peer.sendFile(file);
         }
         else {
@@ -842,15 +842,16 @@ IO.prototype = {
             peer.createOffer(this._getMediaUsed(peer), false, null);
         }, this);
 
-        // Listen to Answer to send
+        // Listen to a new file received
         peer.on('onFileReceived', function(event) {
 
             var msg = {
-                issuer: peer.ID(),
+                caller: peer.ID(),
+                callee: Sonotone.ID,
                 data: event
             };
 
-            this._callbacks.trigger('onFileReceived', msg);
+            this._callbacks.trigger('onPeerFileReceived', msg);
 
         }, this);
 
