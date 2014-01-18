@@ -94,7 +94,6 @@
 
             // Listen to transport event
             sono.on('onTransportReady', onTransportReady, this);
-            sono.off('onTransportReady', onTransportReady);
 
             sono.on('onTransportClose', onTransportClose, this);
             sono.on('onTransportMessage', onTransportMessage, this);
@@ -117,7 +116,7 @@
             sono.remoteMedia().on('onRemoteScreenStreamEnded', onRemoteStreamEnded, this);
 
             // Define your transport layer (WebSocket)
-            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
+            sono.transport('websocket', {host: '192.168.0.137', port: '1337'}).connect({});
 
         };
 

@@ -284,7 +284,7 @@ IO.prototype = {
     },
 
     sendPeerMessage: function(msg, callee) {
-        var peer = this.peerConnections("v" + callee);
+        var peer = this.peerConnections("d" + callee);
         peer.sendMessage(msg);
     },
 
@@ -390,6 +390,7 @@ IO.prototype = {
                 }
                 break;
             case 'data':
+                peer.addDataChannel();
                 //No other thing to do
                 break;
             default:

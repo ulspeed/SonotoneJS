@@ -51,10 +51,8 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, this._adapter.RTCPeerConnectionConstraints(), this._adapter);
 
-    this.addDataChannel();
-
-
-    if(hasRemoteDataChannel) {
+    if(this.media === 'data') {
+        this.addDataChannel();
     }
 
     Sonotone.log("PEERCONNECTION", "PeerConnection created", this._peer);
@@ -62,8 +60,6 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     this._callbacks = new Sonotone.IO.Events();
 
     var that = this;
-
-    console.log("PEER", this._peer);
 
     // Chrome - Firefox
     this._peer.onicecandidate = function(event) {
@@ -138,7 +134,8 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     };
 
     this._peer.ondatachannel = function(event) {
-        console.log("ONDATACHANNEL", event);
+        Sonotone.log("PEERCONNECTION", "Received Data Channel from <" + that._id + ">", event);
+        that.addDataChannel(event.channel);
     };
 
     this._peerReady = true;
@@ -331,6 +328,10 @@ PeerConnection.prototype = {
 
             var constraints = Sonotone.mergeConstraints(offerConstraints, sdpConstraints);
 
+            if(media === 'data') {
+                constraints = null;
+            }
+
             Sonotone.log("PEERCONNECTION", "Create the SDP offer for Peer Connection <" + this._id + ">", constraints);
 
             var that = this;
@@ -395,6 +396,10 @@ PeerConnection.prototype = {
         var that = this;
 
         this.isCaller = false;
+
+        if(media === 'data') {
+            sdpConstraints = null;
+        }
                     
         this._peer.createAnswer(function(answerSDP) {
             //answerSDP.sdp = preferOpus(answerSDP.sdp);
@@ -480,12 +485,13 @@ PeerConnection.prototype = {
 
     /**
      * Add a Data Channel with the peer
+     * @param {Object} channel Add an existing channel 
      *
      * @api public
      */
 
-     addDataChannel: function() {
-        this._dataChannel = new Sonotone.IO.DataChannel(this._id, this._peer, this._caps);
+     addDataChannel: function(channel) {
+        this._dataChannel = new Sonotone.IO.DataChannel(this._id, this._peer, this._caps, channel);
 
         this._subscribeToDataChannelEvents();
      },

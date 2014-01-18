@@ -3,13 +3,14 @@
  * Manage the Data Channel part of the Peer Connection
  * @param {String} id The ID to use
  * @param {Object} peer The parent peer where to add the Data Channel
- * @param {Object} caps The user capabilities
+ * @param {Object} caps The user capabilities 
+ * @param {Object} channel The existing channel received (for answering to a channel)
  *
  * @namespace
  */
 
-var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps) {
-    Sonotone.log("DATACHANNEL", "Data-Channel initialized");
+var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
+    Sonotone.log("DATACHANNEL", "Initialize Data Channel for PeerConnection <" + id + ">");
 
     this._remotePeerID = id;
 
@@ -17,7 +18,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps) {
 
     this._callbacks = new Sonotone.IO.Events();
 
-    this._channel = null;
+    this._channel = channel;
 
     this._file =[];
 
@@ -28,30 +29,36 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps) {
     var that = this;
 
     if(caps.canUseDataChannel) {
-        this._channel = peer.createDataChannel(id, { reliable : true });
 
+        if(!this._channel) {
+            Sonotone.log("DATACHANNEL", "Create a new Data Channel for PeerConnection <" + id + ">");
+            this._channel = peer.createDataChannel(id, null);        
+        }
+        else {
+            Sonotone.log("DATACHANNEL", "Reuse existing channel received for PeerConnection <" + id + ">");
+        }
         // When data-channel is opened with remote peer
         this._channel.onopen = function(){
-            Sonotone.log("DATACHANNEL", "Data-Channel opened with other peer");
+            Sonotone.log("DATACHANNEL", "Data-Channel successfully opened for PeerConnection <" + id + ">");
             that._isReady = true;
         };
 
         // On data-channel error
         this._channel.onerror = function(e){
-            Sonotone.log("DATACHANNEL", "Data-Channel error", e);
+            Sonotone.log("DATACHANNEL", "Data-Channel error for PeerConnection <" + id + ">", e);
             that._isReady = false;
         };
 
         // When data-channel is closed with remote peer
         this._channel.onclose = function(e){
-            Sonotone.log("DATACHANNEL", "Data-Channel close", e);
+            Sonotone.log("DATACHANNEL", "Data-Channel closed for PeerConnection <" + id + ">", e);
             that._isReady = false;
         };
 
         // On new message received
         this._channel.onmessage = function(e){
 
-            Sonotone.log("DATACHANNEL", "Received", e.data);
+            Sonotone.log("DATACHANNEL", "Message received by PeerConnection <" + id + ">", e.data);
 
             if(e.data instanceof ArrayBuffer) {
                 //Sonotone.log("DATACHANNEL", "Type ArrayBuffer");
@@ -114,11 +121,13 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps) {
                 }
             }
 
-        };        
+        };
     }
     else if(!Sonotone.isDataChannelCompliant) {
         Sonotone.log("DATACHANNEL", "Browser not compliant for Data-Sharing");
     }
+
+
 };
 
 /**
@@ -147,11 +156,11 @@ DataChannel.prototype = {
 
     sendData: function(data) {
         if(this._isReady) {
-            Sonotone.log("DATACHANNEL", "Try to send a message to the peer <" + this._remotePeerID + ">");
+            Sonotone.log("DATACHANNEL", "Try to send a message to the peer <" + this._remotePeerID + ">", data);
             this._channel.send(data);
         }
         else {
-            Sonotone.log("DATACHANNEL", "Data Channel not ready for sennding a message!");
+            Sonotone.log("DATACHANNEL", "Data Channel not ready for sending a message!");
         }
     },
 
