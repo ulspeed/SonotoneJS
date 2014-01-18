@@ -72,6 +72,8 @@ Coverage is done using Blanket
 Versions
 ========
 
+v0.4.7: Add the possibility to have Data-Channel connection only between peers
+
 v0.4.6: Add the possibilities to have 2 PeerConnections per user (Screen + Video) 
 
 v0.4.5: Add the off() method in order to remove the events subscribed. Add tests.
