@@ -20,7 +20,7 @@ var Capabilities = Sonotone.IO.Capabilities = function() {
         this._audioVideoEnabled = true;
         this._sharingEnabled = false;
         this._sharingViewerEnabled = true;
-        this._dataChannelEnabled = false;
+        this._dataChannelEnabled = true;
 	}
 	else if (navigator.webkitGetUserMedia && window.webkitRTCPeerConnection) {
         // Chrome: can make call or Sharing

@@ -58,29 +58,33 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
         // On new message received
         this._channel.onmessage = function(e){
 
-            //Sonotone.log("DATACHANNEL", "Message received by PeerConnection <" + id + ">", e.data);
+            Sonotone.log("DATACHANNEL", "Message received by PeerConnection <" + id + ">", e.data);
+
+             var ack =  {
+                type: "FILE_ACK"
+            }; 
 
             if(e.data instanceof ArrayBuffer) {
-                //Sonotone.log("DATACHANNEL", "Type ArrayBuffer");
+                //Sonotone.log("DATACHANNEL", "Type ArrayBuffer", e.data, that._fileInfo.type);
                 var blob = new Blob([e.data], {type: that._fileInfo.type});
                 that._file.push(blob);
 
-                var ack =  {
-                    type: "FILE_ACK"
-                };
                 //Sonotone.log("DATACHANNEL", "Send ACK");
                 that._channel.send(JSON.stringify(ack));
             }
             else if (e.data instanceof Blob) {
                 //Sonotone.log("DATACHANNEL", "Type Blob");
                 that._file.push(e.data);
+
+                //Sonotone.log("DATACHANNEL", "Send ACK");
+                that._channel.send(JSON.stringify(ack));
             }
             else {
 
                 try {
 
                     if(e.data.indexOf('{') === 0) {
-                        //Sonotone.log("DATACHANNEL", "Type SIG");
+                        Sonotone.log("DATACHANNEL", "Type SIG");
                         var jsonMessage = JSON.parse(e.data);
 
                         switch (jsonMessage.type) {
@@ -106,7 +110,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
                                     that._sendBlobFile(that._remainingBlob);
                                 }
                                 else {
-                                    //Sonotone.log("DATACHANNEL", "No more part to send");
+                                    Sonotone.log("DATACHANNEL", "No more part to send");
                                      var msg = {
                                         type: "FILE_END"
                                     };

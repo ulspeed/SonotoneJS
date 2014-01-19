@@ -21,7 +21,7 @@ if (typeof exports !== 'undefined') {
  * @api public
  */
 
-Sonotone.VERSION = '0.4.7';
+Sonotone.VERSION = '0.4.8';
 
 /**
  * ID

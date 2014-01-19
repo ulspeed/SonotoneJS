@@ -123,6 +123,21 @@
             // Define your transport layer (WebSocket)
             sono.transport('websocket', {host: '192.168.0.137', port: '1337'}).connect({});
 
+            window.webkitStorageInfo.requestQuota(PERSISTENT, 10*1024*1024, 
+              function(grantedBytes) {
+                window.webkitRequestFileSystem(PERSISTENT, grantedBytes, 
+                  function(fs) {
+                    console.log("fs", fs);
+                  }, 
+                  function(error) {
+                    console.log("error", error);
+                  }
+                ); 
+              }, function(e) {
+                console.log('Error', e); 
+              }
+            );
+
         };
 
 /* --------------- Video Features ---------------- */
@@ -280,8 +295,35 @@
         function onPeerFileReceived(msg) {
           console.log("RECEIVED:", msg);
 
-          SaveToDisk(msg.data.content, msg.data.info.fileName);
-        };
+          window.webkitRequestFileSystem(window.PERSISTENT, 10*1024*1024, function(fs){
+
+            fs.root.getFile(msg.data.info.fileName, {create: true}, function(fileEntry) {
+              // Create a FileWriter object for our FileEntry (log.txt).
+              fileEntry.createWriter(function(fileWriter) {
+
+                fileWriter.seek(fileWriter.length); // Start write position at EOF.
+
+                fileWriter.write(msg.data.content);
+
+                var link = document.createElement('a');
+                link.href = fileEntry.toURL();
+                link.target = '_blank';
+                link.download = msg.data.info.fileName;
+                link.innerHTML = msg.data.info.fileName;
+
+                document.body.appendChild(link);
+
+              }, function(e) {
+                console.log("Error1", e);
+              });
+
+            }, function(ee){
+              console.log("Error2", ee);
+            });   
+          }, function(eee) {
+            console.log("Error3", eee)
+          });
+      };
 
         function call3() {
           sono.call(users[2].id);
@@ -409,23 +451,6 @@
             }
         };    
 
-        function SaveToDisk(blobURL, fileName) {
-            var reader = new FileReader();
-            reader.readAsDataURL(blobURL);
-            reader.onload = function (event) {
-                var save = document.createElement('a');
-                save.href = event.target.result;
-                save.target = '_blank';
-                save.download = fileName || 'unknown file';
-
-                var event = document.createEvent('Event');
-                event.initEvent('click', true, true);
-                save.dispatchEvent(event);
-                (window.URL || window.webkitURL).revokeObjectURL(save.href);
-            };
-        }    
-
-        
     </script>
 </body>
 </html>
