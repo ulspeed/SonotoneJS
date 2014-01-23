@@ -36,8 +36,6 @@
     <button type="button" onclick="muteScreen();">Mute Screen</button>
     <button type="button" onclick="unmuteScreen();">Unmute Screen</button>
     <br>
-    <button type="button" onclick="stopCall();">Release Call</button>
-    <br>
     <button type="button" onclick="sendIMMessageToAll();">Send Public IM</button>
     <button type="button" onclick="sendIMMessage();">Send Private IM</button>
     <br>
@@ -55,9 +53,7 @@
     <input type="file" id="fileElt">
     <button type="button" onclick="sendFile();">Send File</button>
     <br>
-    <button type="button" onclick="call3();">Call 3rd Peer</button>
-    <button type="button" onclick="broadcast();">Call all Peers</button>
-    
+
     <footer id="footer">
     </footer>
     <script type="text/javascript" src="dist/sonotone.js"></script>
@@ -121,7 +117,7 @@
             sono.remoteMedia().on('onRemoteScreenStreamEnded', onRemoteStreamEnded, this);
 
             // Define your transport layer (WebSocket)
-            sono.transport('websocket', {host: '192.168.0.137', port: '1337'}).connect({});
+            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
 
             window.webkitStorageInfo.requestQuota(PERSISTENT, 10*1024*1024, 
               function(grantedBytes) {

@@ -526,7 +526,7 @@ IO.prototype = {
     mute: function(callee, media) {
         var flag = media.substring(0, 1);
         var peer = this.peerConnections(flag + callee);
-        peer.createOffer(this.localMedia().isScreenCaptured(), false, {action: 'mute'});
+        peer.createOffer(media, false, {action: 'mute'});
     },
 
     /**
@@ -540,7 +540,7 @@ IO.prototype = {
     unmute: function(callee, media) {
         var flag = media.substring(0, 1);
         var peer = this.peerConnections(flag + callee);
-        peer.createOffer(this.localMedia().isScreenCaptured(), false, {action: 'unmute'});      
+        peer.createOffer(media, false, {action: 'unmute'});      
     },
 
     /**
