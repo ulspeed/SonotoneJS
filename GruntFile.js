@@ -21,7 +21,7 @@ module.exports = function(grunt) {
             },
         },
 
-         concat: {
+        concat: {
             options: {
                 separator: '',
                 banner: '(function(){',
@@ -51,11 +51,10 @@ module.exports = function(grunt) {
         watch: {
             src: {
                 files: 'src/**/*.js',
-                tasks: ['jshint', 'concat', 'uglify', 'usebanner', 'test']
-            },
-            test: {
-                files: 'test/**/*.js',
-                tasks: ['test']
+                tasks: ['jshint', 'concat', 'uglify', 'usebanner', 'test'],
+                options: {
+                    livereload: true
+                }
             }
         },
 

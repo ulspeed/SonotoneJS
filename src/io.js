@@ -27,7 +27,7 @@ var IO = Sonotone.IO = function(id, stunConfig, turnConfig) {
 
     //Firefox (STUN) = {"iceServers": [{"url": "stun:stun.services.mozilla.com"}]};
     //Google (STUN) = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
-    Sonotone.stunConfig = stunConfig;
+    Sonotone.stunConfig = stunConfig || {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
 
     /**
      * Configuration for TURN

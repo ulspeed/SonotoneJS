@@ -80,7 +80,7 @@ WebSocketTransport.prototype = {
 
                 }
                 else {
-                    Sonotone.log("TRANSPORT", "Unknown message. Do not treat" + JSON.stringify(message));
+                    Sonotone.log("TRANSPORT", "Unknown message. Do not treat", message);
                 }
             };
 
@@ -90,7 +90,7 @@ WebSocketTransport.prototype = {
             };
 
             this._socket.onerror = function(err) {
-                Sonotone.log("TRANSPORT", "Receive an error message" + JSON.stringify(err));
+                Sonotone.log("TRANSPORT", "Receive an error message", err);
                 that._callbacks.trigger('onError', err);
             };
         }

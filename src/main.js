@@ -63,11 +63,16 @@ Sonotone.log = function(cat, msg, arg) {
 
         var time = new Date();
 
+        var displaycat = cat.substring(0, 12);
+        while(displaycat.length < 12) {
+            displaycat += ' ';
+        }
+
         if(arg !== undefined) {
-            console.log("%c|'O~O'| " + time.toLocaleTimeString() + ":" + time.getMilliseconds() + " [" + cat + "] - " + msg + " | %O", "color:" + color[cat], arg);
+            console.log("%c|'O~O'| " + time.toLocaleTimeString() + ":" + time.getMilliseconds() + " [" + displaycat + "] - " + msg + " | %O", "color:" + color[cat], arg);
         }
         else {
-         console.log("%c|'O~O'| " + time.toLocaleTimeString() + ":" + time.getMilliseconds() + " [" + cat + "] - " + msg, "color:" + color[cat]);   
+         console.log("%c|'O~O'| " + time.toLocaleTimeString() + ":" + time.getMilliseconds() + " [" + displaycat + "] - " + msg, "color:" + color[cat]);   
         }
     }
 };

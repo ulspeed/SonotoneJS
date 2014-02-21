@@ -3,24 +3,131 @@
 <head>
     <title>WebRTC Demo</title>  
     <style>
-        video {
-            border:5px solid steelblue;
-            width:400px;
-            height:300px;
-        }
         button {
             font: 18px sans-serif;
             padding: 8px;
         }
+
+        /* Adapt display to screen: Wide screen */
+        @media screen and (min-width: 1280px) {
+          .area-size {
+            width: 480px;
+            height: 480px;
+          }
+
+          .video-size {
+            width: 120px;
+            height: 90px;
+          }
+
+          .screen-size {
+            width: 480px;
+            height:360px;
+          } 
+        }
+
+        /* Adapt display to screen: Laptop screen */
+        @media screen and (max-width: 1280px) {
+
+          .area-size {
+            width: 240px;
+            height: 240px;
+          }
+
+          .video-size {
+            width: 60px;
+            height: 45px;
+          }
+
+          .screen-size {
+            width: 240px;
+            height:180px;
+          }
+
+        }
+
+        /* No specific styles */
+
+        body {
+          width: 100%;
+          height: 100%;
+        }
+
+        .demo {
+          position: relative;
+          width: 100%;
+          text-align: center;
+          height: 32px;
+          line-height: 32px;
+          font-size: 16px;
+          font-weight: bold;
+        }
+
+        .local {
+          position: relative;
+          display: inline-block;
+          margin-left: 32px;
+        }
+
+        .remote {
+          position: relative;
+          display: inline-block;
+          float: right;
+          margin-right: 48px;
+        }
+
+        .control {
+          position: relative;
+          width: 100%;
+          display: inline-block;
+          margin-top: 10px;
+        }
+
+        .video {
+          border: 1px solid #696969;
+          position: absolute;
+          display: inline-block;
+          top: 1px;
+          left: 1px;          
+        }
+
+        .screen {
+          border:2px solid #696969;
+          position: relative; 
+        }
+
+        .title {
+          position: relative;
+          width: 100%;
+          height: 32px;
+          text-align: center;
+          line-height: 32px;
+        }        
+
+        .clear {
+          clear: both;
+        }
+
     </style>
 </head>
 <body onload="initialize();">
-    <video id="localVideo" autoplay="true" style="width:160px; height:120px;"></video>
-    <video id="localScreen" autoplay="true" style="width:160px; height:120px;"></video>
-    <video id="remoteVideo" autoplay="true" style="margin-left:5px;width:160px;height:120px"></video>
-    <video id="remoteScreen" autoplay="true" style="margin-left:5px;width:160px;height:120px"></video>
 
-    <p></p>
+  <div class="demo">WebRTC Demos using Sonotone.js</div>
+
+  <div class='remote area-size'>
+      <video id="remoteScreen" autoplay="true" class="screen screen-size"></video>
+      <video id="remoteVideo" autoplay="true" class="video video-size"></video>  
+      <div class="title">Remote User</div>
+  </div>
+
+  <div class='local area-size'>
+      <video id="localScreen" autoplay="true" class="screen screen-size"></video>
+      <video id="localVideo" autoplay="true" class="video video-size"></video>
+      <div class="title">Local User</div>
+  </div>
+  
+  <p class='clear'></p>
+  <div class= 'control'>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="callVideo();">VideoCall a Peer</button>
     <button type="button" onclick="removeVideoToCall();">Remove Video</button>
@@ -53,10 +160,13 @@
     <input type="file" id="fileElt">
     <button type="button" onclick="sendFile();">Send File</button>
     <br>
+</div>
 
     <footer id="footer">
     </footer>
+
     <script type="text/javascript" src="dist/sonotone.js"></script>
+    <script type="text/javascript" src="./sip.js"></script>
 
     <script>
 
@@ -71,7 +181,14 @@
         var timestampPrev;
         var answerID = '';
 
+        function isCallPossible() {
+          return (users.length > 0);
+        };
+
         function initialize() {
+
+            //var toto = new sip.UserAgent(this._stack);
+            console.log("DEMO :: Started...");
 
             // Define your Sonotone settings
             Sonotone.debug = true;
@@ -117,22 +234,8 @@
             sono.remoteMedia().on('onRemoteScreenStreamEnded', onRemoteStreamEnded, this);
 
             // Define your transport layer (WebSocket)
-            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
-
-            window.webkitStorageInfo.requestQuota(PERSISTENT, 10*1024*1024, 
-              function(grantedBytes) {
-                window.webkitRequestFileSystem(PERSISTENT, grantedBytes, 
-                  function(fs) {
-                    console.log("fs", fs);
-                  }, 
-                  function(error) {
-                    console.log("error", error);
-                  }
-                ); 
-              }, function(e) {
-                console.log('Error', e); 
-              }
-            );
+            //sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
+            sono.transport('websocket', {host: '172.26.165.198', port: '1337'}).connect({})
 
         };
 
@@ -151,38 +254,74 @@
         };
 
         function callVideo() {
-          var id = users[0].id;
-            sono.call(id, 'video', false);
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.call(id, 'video', false);  
+          }
+          else {
+            console.log("DEMO :: No participant to call !!!")
+          }
         };
 
         function addVideoToCall() {
-          var id = users[0].id;
-          sono.addVideoToCall(id);
+
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.addVideoToCall(id);
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         }
 
         function removeVideoToCall() {
-          var id = users[0].id;
-          sono.removeVideoFromCall(id); 
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.removeVideoFromCall(id); 
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         }
 
         function isInVideo() {
-          var id = users[0].id;
-          console.log("Is in Video with " + id + ":" + sono.isVideoReceivedFrom(id));  
+          if(isCallPossible()) {
+            var id = users[0].id;
+            console.log("DEMO :: Is in Video with " + id + ":" + sono.isVideoReceivedFrom(id));    
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         }
 
         function stopVideo() {
-            var id = users[0].id;
-            sono.release(id, 'video');
+            if(isCallPossible()) {
+              var id = users[0].id;
+              sono.release(id, 'video');
+            }
+            else {
+              console.log("DEMO :: No participant !!!");
+            }
         };
 
         function muteVideo() {
-          document.getElementById('localVideo').setAttribute('muted', 'muted');
-          sono.mute(users[0].id, "video");
+          if(isCallPossible()) {
+            document.getElementById('localVideo').setAttribute('muted', 'muted');
+            sono.mute(users[0].id, "video");
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
         function unmuteVideo() {
-          document.getElementById('localVideo').removeAttribute('muted');
-          sono.unmute(users[0].id, 'video');
+          if(isCallPossible()) {
+            document.getElementById('localVideo').removeAttribute('muted');
+            sono.unmute(users[0].id, 'video');  
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
 
@@ -194,27 +333,52 @@
         };
 
         function endScreen() {
-          var id = users[0].id;
-          sono.release(id, 'screen');
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.release(id, 'screen');  }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         }
 
         function callScreen() {
-          var id = users[0].id;
-          sono.call(id, 'screen', false);
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.call(id, 'screen', false);
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         }
 
         function muteScreen() {
-          sono.mute(users[0].id, 'screen');
+            if(isCallPossible()) {
+              sono.mute(users[0].id, 'screen');
+            }
+            else {
+              console.log("DEMO :: No participant !!!");
+            }
         };
 
         function unmuteScreen() {
-          sono.unmute(users[0].id, 'screen');
+
+          if(isCallPossible()) {
+            sono.unmute(users[0].id, 'screen');  
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
         function isInScreen() {
-          var id = users[0].id;
-          console.log("Is in Screen sharing with " + id + ":" + sono.isScreenReceivedFrom(id));  
-        }
+          if(isCallPossible()) {
+            var id = users[0].id;
+            console.log("DEMO :: Is in Screen sharing with " + id + ":" + sono.isScreenReceivedFrom(id));  
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
+        };
 
 
 /* --------------- Chat & Message Features ---------------- */
@@ -233,7 +397,7 @@
         };
 
         function onPeerIMMessage(msg) {
-          console.log("IM Message received", msg);
+          console.log("DEMO :: IM Message received", msg);
         };
 
         function sendIMMessageToAll() {
@@ -241,8 +405,14 @@
         };
 
         function sendIMMessage() {
-          var id = users[0].id;
-          sono.sendIMMessage('Hello ' + id, id);
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.sendIMMessage('Hello ' + id, id);
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
+          
         };
 
 
@@ -259,7 +429,7 @@
         };
 
         function onStats(event) {
-            console.log("STATS:", event);
+            console.log("DEMO :: STATS:", event);
             
         }
 
@@ -268,56 +438,82 @@
 /* --------------- Others Features ---------------- */
 
         function dataCall() {
-          var id = users[0].id;
-          sono.call(id, 'data');
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.call(id, 'data');  
+          }
+          else {
+            console.log("DEMO :: No particpant !!!");
+          }
         };
 
         function addDataChannel() {
-          var id = users[0].id;
-          sono.addDataToCall(id, 'video');
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.addDataToCall(id, 'video'); 
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
         function sendData() {
-          var id = users[0].id;
-          sono.sendPeerMessage('Hello ' + id, id);
+          if(isCallPossible()) {
+            var id = users[0].id;
+            sono.sendPeerMessage('Hello ' + id, id);  
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
         function sendFile() {
-          var id = users[0].id;
-          var fileList = fileElt.files;
-          sono.sendFile(fileList[0], id);
+          if(isCallPossible()) {
+            var id = users[0].id;
+            var fileList = fileElt.files;
+            sono.sendFile(fileList[0], id);
+          }
+          else {
+            console.log("DEMO :: No participant !!!");
+          }
         };
 
         function onPeerFileReceived(msg) {
-          console.log("RECEIVED:", msg);
+          console.log("DEMO :: RECEIVED:", msg);
 
-          window.webkitRequestFileSystem(window.PERSISTENT, 10*1024*1024, function(fs){
+          navigator.webkitPersistentStorage.requestQuota(10*1024*1024, function(grantedBytes){
 
-            fs.root.getFile(msg.data.info.fileName, {create: true}, function(fileEntry) {
-              // Create a FileWriter object for our FileEntry (log.txt).
-              fileEntry.createWriter(function(fileWriter) {
+            window.webkitRequestFileSystem(window.PERSISTENT, grantedBytes, function(fs) {
+    
+              fs.root.getFile(msg.data.info.fileName, {create: true}, function(fileEntry) {
+                // Create a FileWriter object for our FileEntry (log.txt).
+                fileEntry.createWriter(function(fileWriter) {
 
-                fileWriter.seek(fileWriter.length); // Start write position at EOF.
+                  fileWriter.seek(fileWriter.length); // Start write position at EOF.
 
-                fileWriter.write(msg.data.content);
+                  fileWriter.write(msg.data.content);
 
-                var link = document.createElement('a');
-                link.href = fileEntry.toURL();
-                link.target = '_blank';
-                link.download = msg.data.info.fileName;
-                link.innerHTML = msg.data.info.fileName;
+                  var link = document.createElement('a');
+                  link.href = fileEntry.toURL();
+                  link.target = '_blank';
+                  link.download = msg.data.info.fileName;
+                  link.innerHTML = msg.data.info.fileName;
 
-                document.body.appendChild(link);
+                  document.body.appendChild(link);
 
-              }, function(e) {
-                console.log("Error1", e);
+                }, function(e) {
+                  console.log("DEMO :: Error1", e);
+                });
+
+              }, function(ee) {
+                console.log("DEMO :: Error2", ee);
               });
 
-            }, function(ee){
-              console.log("Error2", ee);
+            }, function(eee){
+              console.log("DEMO :: Error3", eee);
             });   
-          }, function(eee) {
-            console.log("Error3", eee)
+          }, function(eeee) {
+            console.log("DEMO :: Error4", eeee)
           });
       };
 
@@ -334,19 +530,19 @@
 
 
         function onTransportReady() {
-          console.log("Transport ready");
+          console.log("DEMO :: Transport ready");
         };
 
         function onTransportClose() {
-          console.log("Transport closed");
+          console.log("DEMO :: Transport closed");
         };
 
         function onTransportMessage(msg) {
-          console.log("Transport message", msg);
+          console.log("DEMO :: Transport message", msg);
         };
 
         function onTransportError(msg) {
-          console.log("Transport error", msg);
+          console.log("DEMO :: Transport error", msg);
         };
 
 
@@ -355,11 +551,11 @@
 
         function onPeerConnected(user) {
           users.push(user);
-          console.log("New User:" + user.id + " (" + users.length + " connected users)");
+          console.log("DEMO :: New User:" + user.id + " (" + users.length + " connected users)");
         };
 
         function onPeerDisconnected(msg) {
-          console.log("User to remove: ", msg.id);
+          console.log("DEMO :: User to remove: ", msg.id);
           var indexToRemove = -1;
 
           for (var i=0; i < users.length; i++) {
@@ -371,7 +567,7 @@
             var removed = users.splice(indexToRemove, 1);
               removed = null;
           }
-          console.log(users.length + " users remains");
+          console.log("DEMO :: " + users.length + " users remains");
         };
 
 
@@ -379,20 +575,20 @@
 
 
         function onCallOffered(msg) {
-          console.log("ON CALL OFFERED:", msg);
+          console.log("DEMO :: ON CALL OFFERED:", msg);
           sono.answer(msg.id);  
         };
 
         function onCallAnswered(msg) {
-          console.log("ON CALL ANSWERED:", msg);
+          console.log("DEMO :: ON CALL ANSWERED:", msg);
         };
 
         function onCallStarted(msg) {
-          console.log("ON CALL STARTED:", msg);
+          console.log("DEMO :: ON CALL STARTED:", msg);
         };
 
         function onCallEnded(msg) {
-          console.log("ON CALL ENDED:", msg);
+          console.log("DEMO :: ON CALL ENDED:", msg);
           if(msg.media === 'video') {
             document.getElementById('remoteVideo').src = '';
           }

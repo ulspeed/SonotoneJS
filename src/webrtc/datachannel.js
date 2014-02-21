@@ -84,7 +84,7 @@ var DataChannel = Sonotone.IO.DataChannel = function(id, peer, caps, channel) {
                 try {
 
                     if(e.data.indexOf('{') === 0) {
-                        Sonotone.log("DATACHANNEL", "Type SIG");
+                        //Sonotone.log("DATACHANNEL", "Type SIG");
                         var jsonMessage = JSON.parse(e.data);
 
                         switch (jsonMessage.type) {
