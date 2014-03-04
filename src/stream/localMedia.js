@@ -149,7 +149,7 @@ LocalMedia.prototype = {
             this._requestUserMediaPending = true;
 
             this._adapter.getUserMedia(mediaConstraints, function(_stream) {
-                Sonotone.log("LOCALMEDIA", "User has granted access to local media - Camera");              
+                Sonotone.log("LOCALMEDIA", "User has granted access to local media - Camera", _stream);              
                 that._streamVideo = _stream;
                 that._requestUserMediaPending = false;
                 that._subscribeToStreamEvent(that._streamVideo);

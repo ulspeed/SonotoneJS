@@ -4,15 +4,16 @@
     <title>WebRTC Demo</title>  
     <style>
         button {
-            font: 18px sans-serif;
-            padding: 8px;
+            font: 14px;
+            margin: 6px 3px 6px 0;
+            height: 22px;
         }
 
         /* Adapt display to screen: Wide screen */
-        @media screen and (min-width: 1280px) {
+        @media screen and (min-width: 810px) {
           .area-size {
-            width: 480px;
-            height: 480px;
+            width: 800px;
+            height: 600px;
           }
 
           .video-size {
@@ -20,18 +21,27 @@
             height: 90px;
           }
 
+          .video-remote-size {
+            width: 200px;
+            height: 150px;
+          }
+
           .screen-size {
-            width: 480px;
-            height:360px;
+            width: 800px;
+            height:600px;
+          }
+
+          .video-position {
+            left: 601px;
           } 
         }
 
         /* Adapt display to screen: Laptop screen */
-        @media screen and (max-width: 1280px) {
+        @media screen and (max-width: 810px) {
 
           .area-size {
-            width: 240px;
-            height: 240px;
+            width: 400px;
+            height: 300px;
           }
 
           .video-size {
@@ -39,11 +49,19 @@
             height: 45px;
           }
 
-          .screen-size {
-            width: 240px;
-            height:180px;
+          .video-remote-size {
+            width: 100px;
+            height: 75px;
           }
 
+          .screen-size {
+            width: 400px;
+            height:300px;
+          }
+
+          .video-position {
+            left: 301px;
+          }
         }
 
         /* No specific styles */
@@ -53,34 +71,17 @@
           height: 100%;
         }
 
-        .demo {
-          position: relative;
-          width: 100%;
-          text-align: center;
-          height: 32px;
-          line-height: 32px;
-          font-size: 16px;
-          font-weight: bold;
-        }
-
-        .local {
-          position: relative;
-          display: inline-block;
-          margin-left: 32px;
-        }
-
         .remote {
           position: relative;
           display: inline-block;
-          float: right;
-          margin-right: 48px;
+          margin-left: 10px;
         }
 
         .control {
           position: relative;
           width: 100%;
           display: inline-block;
-          margin-top: 10px;
+          margin-left: 10px;
         }
 
         .video {
@@ -88,7 +89,14 @@
           position: absolute;
           display: inline-block;
           top: 1px;
-          left: 1px;          
+        }
+
+        .video-local {
+          border: 1px solid #696969;
+          position: absolute;
+          display: inline-block;
+          top: 1px;
+          left: 1px; 
         }
 
         .screen {
@@ -112,51 +120,48 @@
 </head>
 <body onload="initialize();">
 
-  <div class="demo">WebRTC Demos using Sonotone.js</div>
-
-  <div class='remote area-size'>
+  <div id='remote' class='remote area-size'>
       <video id="remoteScreen" autoplay="true" class="screen screen-size"></video>
-      <video id="remoteVideo" autoplay="true" class="video video-size"></video>  
-      <div class="title">Remote User</div>
-  </div>
-
-  <div class='local area-size'>
-      <video id="localScreen" autoplay="true" class="screen screen-size"></video>
-      <video id="localVideo" autoplay="true" class="video video-size"></video>
-      <div class="title">Local User</div>
+      <video id="localVideo" autoplay="true" class="video-local video-size"></video>
+      <video id="remoteVideo" autoplay="true" class="video video-position video-remote-size"></video>  
   </div>
   
   <p class='clear'></p>
   <div class= 'control'>
+    <button type="button" onclick="peerConnectionC()">PC Chrome</button>
+    <button type="button" onclick="peerConnectionF()">PC Firefox</button>
+    <span>&nbsp;|&nbsp;</span>
+    <button type="button" onclick="dataChannelC()">DC Chrome</button>
+    <button type="button" onclick="dataChannelF()">DC Firefox</button>
+    <span>&nbsp;|&nbsp;</span>
+    <button type="button" onclick="stats();">Stats</button>
+    <button type="button" onclick="stopStats();">Stop Stats</button>
+    <br/>
     <button type="button" onclick="startVideo();">Pick my Video</button>
     <button type="button" onclick="callVideo();">VideoCall a Peer</button>
     <button type="button" onclick="removeVideoToCall();">Remove Video</button>
     <button type="button" onclick="addVideoToCall();">Add Video</button>
     <button type="button" onclick="stopVideo();">Stop Video</button>
-    <br>
+    <span>&nbsp;|&nbsp;</span>
     <button type="button" onclick="share();">Pick my Screen</button>
     <button type="button" onclick="callScreen();">ScreenCall a Peer</button>
     <button type="button" onclick="endScreen();">Stop Screen</button>
     <br>
     <button type="button" onclick="muteVideo();">Mute Video</button>
     <button type="button" onclick="unmuteVideo();">Unmute Video</button>
+    <span>&nbsp;|&nbsp;</span>
     <button type="button" onclick="muteScreen();">Mute Screen</button>
     <button type="button" onclick="unmuteScreen();">Unmute Screen</button>
-    <br>
-    <button type="button" onclick="sendIMMessageToAll();">Send Public IM</button>
-    <button type="button" onclick="sendIMMessage();">Send Private IM</button>
-    <br>
-    <button type="button" onclick="stats();">Stats</button>
-    <button type="button" onclick="stopStats();">Stop Stats</button>
-    <br>
+    <br/>
+    <!--
     <button type="button" onclick="isInVideo();">Received Video ?</button>
     <button type="button" onclick="isInScreen();">Received Screen Sharing ?</button>
     <br>
-
+    -->
     <button type="button" onclick="dataCall();">DataCall a Peer</button>
     <button type="button" onclick="addDataChannel();">Add DataChannel</button>
     <button type="button" onclick="sendData();">Send Data</button>
-    <br>
+    <span>&nbsp;|&nbsp;</span>
     <input type="file" id="fileElt">
     <button type="button" onclick="sendFile();">Send File</button>
     <br>
@@ -238,6 +243,32 @@
             sono.transport('websocket', {host: '172.26.165.198', port: '1337'}).connect({})
 
         };
+
+
+/* --------------- WebRTC APIs ---------------- */
+
+        function peerConnectionC() {
+          var peer = new window.webkitRTCPeerConnection(null);
+          console.log("Peer Connection Chrome", peer);
+        };
+
+        function peerConnectionF() {
+          var peer = new window.mozRTCPeerConnection();
+          console.log("Peer Connection Firefox", peer);
+        };  
+
+        function dataChannelC() {
+          var peer = new window.webkitRTCPeerConnection(null);
+          var channel = peer.createDataChannel('demo');
+          console.log("DataChannel", channel);
+        };
+
+        function dataChannelF() {
+          var peer = new window.mozRTCPeerConnection();
+          var channel = peer.createDataChannel('demo');
+          console.log("DataChannel", channel);
+        };     
+
 
 /* --------------- Video Features ---------------- */
 
@@ -607,7 +638,7 @@
         };
 
         function onLocalScreenStreamStarted(stream) {
-          sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
+          //sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
           isSharing = true;
         };
 
@@ -617,7 +648,7 @@
         };
 
         function onLocalScreenStreamEnded() {
-          document.getElementById('localScreen').src = '';
+          //document.getElementById('localScreen').src = '';
           isSharing = false;
         }
 
