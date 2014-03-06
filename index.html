@@ -10,9 +10,9 @@
         }
 
         /* Adapt display to screen: Wide screen */
-        @media screen and (min-width: 810px) {
+        @media screen and (min-width: 1000px) {
           .area-size {
-            width: 800px;
+            width: 960px;
             height: 600px;
           }
 
@@ -27,20 +27,20 @@
           }
 
           .screen-size {
-            width: 800px;
+            width: 960px;
             height:600px;
           }
 
           .video-position {
-            left: 601px;
+            left: 761px;
           } 
         }
 
         /* Adapt display to screen: Laptop screen */
-        @media screen and (max-width: 810px) {
+        @media screen and (max-width: 1000px) {
 
           .area-size {
-            width: 400px;
+            width: 480px;
             height: 300px;
           }
 
@@ -55,12 +55,12 @@
           }
 
           .screen-size {
-            width: 400px;
+            width: 480px;
             height:300px;
           }
 
           .video-position {
-            left: 301px;
+            left: 381px;
           }
         }
 
@@ -240,7 +240,7 @@
 
             // Define your transport layer (WebSocket)
             //sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
-            sono.transport('websocket', {host: '172.26.165.198', port: '1337'}).connect({})
+            sono.transport('websocket', {host: '172.26.134.23', port: '1337'}).connect({})
 
         };
 

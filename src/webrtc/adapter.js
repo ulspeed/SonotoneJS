@@ -85,7 +85,7 @@ Adapter.prototype = {
 			return {
 				optional: [
 					{
-						DtlsSrtpKeyAgreement: true
+						//DtlsSrtpKeyAgreement: true
 					}
 				]
 			};
