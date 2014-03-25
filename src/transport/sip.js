@@ -4,10 +4,12 @@
  * @namespace
  */
 
-var SIPTransport = Sonotone.IO.SIPTransport = function(config) {
+var SIPTransport = Sonotone.IO.SIPTransport = function() {
 
-    console.log("config:", config);
-    this._socket = null;
+    this._softPhone = null;
+    this._transportReady = false;
+    this._call = null;
+
     this._callbacks = new Sonotone.IO.Events();
 };
 
@@ -17,6 +19,10 @@ var SIPTransport = Sonotone.IO.SIPTransport = function(config) {
  */
 
 SIPTransport.prototype = {
+
+    type: function() {
+        return "sip";
+    },
 
     /**
      * Subscribe to Transport events
@@ -49,49 +55,51 @@ SIPTransport.prototype = {
      * @api public
      */
 
-    connect: function() {
-        if(!this._socket) {
-            Sonotone.log("TRANSPORT", "Try to connect to SIG server");
-            
-            this._socket = new WebSocket("ws://172.26.161.86:11112");
+    connect: function(params) {
+        var that = this;
 
-            this._socket.onopen = function() {
-                Sonotone.log("TRANSPORT", "Channel Ready");
-            };
+        this._softPhone = new JsSIP.UA(params);
 
-            this._socket.onmessage = function() {
-                console.log("toto");
-                //Sonotone.log("TRANSPORT", "received", msg);
-            };
+        this._softPhone.on('registered', function() {
+            Sonotone.log("TRANSPORT", "Registered to SIP Server thru WebSocket Gateway", params.ws_servers);
+            that._transportReady = true;
+            that._callbacks.trigger('onReady', {msg: 'registered'});
+        });
 
-            this._socket.onclose = function() {
-                Sonotone.log("TRANSPORT", "Channel Closed");
-            };
+        this._softPhone.on('unregistered', function() {
+           that._callbacks.trigger('onClose', {msg: 'unregistered'}); 
+        });
 
-            this._socket.onerror = function(err) {
-                Sonotone.log("TRANSPORT", "Receive an error message", err);
-            };
-        }
+        this._softPhone.on('registrationFailed', function() {
+            that._callbacks.trigger('onError', {err: 'registration-failed'});
+        });
+
+        this._softPhone.on('connected', function() {
+            //that._callbacks.trigger('onConnected', null);
+        });
+
+        this._softPhone.on('disconnected', function() {
+            //that._callbacks.trigger('onDisconnected', null);
+        });
+
+        this._softPhone.on('newRTCSession', function(e){
+            that._call = e.data.session;
+            Sonotone.log("TRANSPORT", "Get the call session", that._call);
+        });
+
+        Sonotone.log("TRANSPORT", "Try to register to SIP Server with user", params.uri);
+        this._softPhone.start();
+
+        
+        // this._softPhone.call('7040', {
+        //     'extraHeaders': [ 'X-Foo: foo', 'X-Bar: bar'],
+        //     'RTCConstraints': {"optional" : [{'DtlsSrtpKeyAgreement': true}]},
+        //     'mediaConstraints': {'audio': true, 'video': false}
+        // });
     },
 
-    invite: function() {
-
-        console.log('invite');
-
-        var msg = 'REGISTER sip:172.26.161.86 SIP/2.0\r\n' + 
-            'Via: SIP/2.0/WS 0favl06pnehr.invalid;branch=z9hG4bK6362795\r\n' + 
-            'Max-Forwards: 69\r\n' + 
-            'To: <sip:1000@172.26.161.86>\n' + 
-            'From: "1000" <sip:1000@172.26.161.86>;tag=8pm5mjc9r6\r\n' + 
-            'Call-ID: 9m066q4onv48liqouhdo94\r\n' + 
-            'CSeq: 81 REGISTER\r\n' + 
-            'Contact: <sip:b5ukfko1@0favl06pnehr.invalid;transport=ws>;reg-id=1;+sip.instance="<urn:uuid:a2223471-94ca-4436-b16a-fd78828a2961>";expires=600\r\n' + 
-            'Allow: ACK,CANCEL,BYE,OPTIONS\r\n' + 
-            'Supported: path, outbound, gruu\r\n' + 
-            'User-Agent: JsSIP 0.3.0\r\n' + 
-            'Content-Length: 0\r\n\r\n';
-
-        this._socket.send(msg);
+    send: function(JSONMessage) {
+        console.log("SEND SIP", JSONMessage);
     }
 
 

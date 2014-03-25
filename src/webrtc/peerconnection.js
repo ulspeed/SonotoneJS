@@ -39,7 +39,7 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this._streamConnected = false;
 
-    this._streamForcedDetached = true;
+    this._streamForcedDetached = false;
 
     this.statID = '';
 
@@ -47,9 +47,12 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
 
     this._adapter = adapter;
 
+    this._localsdp = null;
+
     Sonotone.log("PEERCONNECTION", "Use STUN Server", Sonotone.stunConfig);
 
-    this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, this._adapter.RTCPeerConnectionConstraints(), this._adapter);
+    //this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, this._adapter.RTCPeerConnectionConstraints(), this._adapter);
+    this._peer = this._adapter.RTCPeerConnection(Sonotone.stunConfig, null);
 
     if(this.media === 'data') {
         this.addDataChannel();
@@ -64,11 +67,25 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     // Chrome - Firefox
     this._peer.onicecandidate = function(event) {
         if (event.candidate) {
-            Sonotone.log("PEERCONNECTION", "Send local ICE CANDIDATE to PEER CONNECTION <" + that._id + ">");
+            Sonotone.log("PEERCONNECTION", "Get local ICE CANDIDATE from PEER CONNECTION <" + that._id + ">", event);
             that._callbacks.trigger('onICECandiateReceived', event);
         } else {
-            Sonotone.log("PEERCONNECTION", "No more local candidate to PEER CONNECTION <" + that._id + ">");
-            that._callbacks.trigger("onICECandidateEnd", event);
+            Sonotone.log("PEERCONNECTION", "No more local candidate to PEER CONNECTION <" + that._id + ">", event);
+            
+            //Todo send SDP
+            var msg = {
+                data: {
+                    type: 'offer',
+                    sdp: that.getLocalDescription().sdp
+                }, 
+                caller: Sonotone.ID,
+                callee:  that._id.substring(1),
+                media: that._media,
+                channel: false,
+                muted: false
+            };
+
+            that._callbacks.trigger("onICECandidateEnd", msg);
         }
     };
 
@@ -94,9 +111,16 @@ var PeerConnection = Sonotone.IO.PeerConnection = function(id, hasRemoteDataChan
     };
 
     // Chrome only
+    // Only if stream is connected
     this._peer.onnegotiationneeded = function(event) {
         Sonotone.log("PEERCONNECTION", "On negotiation needed for PEER CONNECTION <" + that._id + ">", event);
-        that._callbacks.trigger('onNegotiationNeeded', event);
+        if(that._streamConnected) {
+            that._callbacks.trigger('onNegotiationNeeded', event);
+            Sonotone.log("PEERCONNECTION", "Negotiation really needed because PEER CONNECTION <" + that._id + "> is connected");    
+        }
+        else {
+            Sonotone.log("PEERCONNECTION", "Negotiation not needed because PEER CONNECTION <" + that._id + "> is not connected", event);
+        }
     };
 
     // Chrome only
@@ -286,6 +310,10 @@ PeerConnection.prototype = {
         this._peer.setLocalDescription(SDP);
     },
 
+    getLocalDescription: function() {
+        return this._peer.localDescription;
+    },
+
     /**
      * Store the SDP into the Remote Description of the peer
      * @param {Objet} SDP The JSON SDP message
@@ -335,7 +363,7 @@ PeerConnection.prototype = {
             Sonotone.log("PEERCONNECTION", "Create the SDP offer for Peer Connection <" + this._id + ">", constraints);
 
             var that = this;
-        
+
             this._peer.createOffer(function(offerSDP) {
 
                 if(fct) {
@@ -352,11 +380,10 @@ PeerConnection.prototype = {
                     }
                 }
                 
+                Sonotone.log("PEERCONNECTION", "Set the SDP to local description for <" + that._id + ">", offerSDP);
                 //offerSDP.sdp = preferOpus(offerSDP.sdp);
                 that.setLocalDescription(offerSDP);
                 
-                Sonotone.log("PEERCONNECTION", "Send this SDP OFFER to the remote peer <" + that._id + ">");
-
                 var event = {
                     data: offerSDP,
                     caller: Sonotone.ID,

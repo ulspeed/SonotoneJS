@@ -31,7 +31,10 @@ RemoteMedia.prototype = {
 
     stream: function(stream, peerID, mediaType) {
         if(stream !== null) {
-            if(this._stream[peerID] !== null) {
+
+            Sonotone.log("REMOTEMEDIA", "Existing Streams", this._stream);
+
+            if(this._stream[peerID] !== undefined) {
                 Sonotone.log("REMOTEMEDIA", "Stream already exists. Add again to the Remote Media for peer <" + peerID + ">");
             }
             else {
@@ -43,13 +46,17 @@ RemoteMedia.prototype = {
             var id = peerID.substring(1);
 
             this._subscribeToStreamEvent(stream, id, mediaType);
+
+            var evt = {id: id, media: mediaType, stream: stream};
+
             if(mediaType === 'video') {
-                this._callbacks.trigger('onRemoteVideoStreamStarted', {id: id, media: mediaType, stream: stream});    
+                Sonotone.log("REMOTEMEDIA", "Fire new remote video stream received", evt);
+                this._callbacks.trigger('onRemoteVideoStreamStarted', evt);    
             }
             else {
-                this._callbacks.trigger('onRemoteScreenStreamStarted', {id: id, media: mediaType, stream: stream});    
+                Sonotone.log("REMOTEMEDIA", "Fire new remote screen stream received", evt);
+                this._callbacks.trigger('onRemoteScreenStreamStarted', evt);    
             }
-            
         }
 
         return this._stream;
@@ -109,6 +116,8 @@ RemoteMedia.prototype = {
     _subscribeToStreamEvent: function(stream, id, media) {
 
         var that = this;
+
+        console.log("subscribe to remote stream", stream, id, media);
 
         stream.onended = function() {
             Sonotone.log("REMOTEMEDIA", "Remote Stream has ended"); 

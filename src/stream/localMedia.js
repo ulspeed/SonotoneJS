@@ -418,7 +418,9 @@ LocalMedia.prototype = {
 
             var s = e.currentTarget;
 
-            Sonotone.log("LOCALMEDIA", "A local track has ended", s.id);
+            Sonotone.log("LOCALMEDIA", "A local track has ended... Try to find the good one...", s.id);
+
+            console.log("VIDEO/SCREEN", that._streamVideo, that._streamScreen);
 
             if(that._streamVideo) {
                 if(s.id === that._streamVideo.id) {
@@ -429,7 +431,7 @@ LocalMedia.prototype = {
                     that._isCameraCaptured = false;
                 }
                 else {
-                    Sonotone.log("LOCALMEDIA", "Unknow ended stream");
+                    Sonotone.log("LOCALMEDIA", "Not the Video stream");
                 }    
             }
             if (that._streamScreen) {
@@ -441,7 +443,7 @@ LocalMedia.prototype = {
                     that._isScreenCaptured = false;
                 }
                 else {
-                    Sonotone.log("LOCALMEDIA", "Unknow ended stream");
+                    Sonotone.log("LOCALMEDIA", "Not the Screen stream");
                 }
             }
         };

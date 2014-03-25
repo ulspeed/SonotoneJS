@@ -21,6 +21,11 @@ var RemoteTransport = Sonotone.IO.RemoteTransport = function(config) {
 
 RemoteTransport.prototype = {
 
+
+    type: function() {
+        return "remote";
+    },
+
     /**
      * Subscribe to Transport events
      * @param {String} eventName The event to subscribe

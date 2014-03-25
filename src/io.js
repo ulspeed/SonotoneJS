@@ -275,7 +275,19 @@ IO.prototype = {
         var peer = null;
 
         if(callee) {
+
+            var exist = false;
+
+            if("d" + callee in this._peerConnections) {
+                exist = true;
+            }
+
             peer = this.peerConnections("d" + callee);
+
+            if(!exist) {
+                peer.addDataChannel();
+            }
+
             peer.sendFile(file);
         }
         else {
@@ -552,9 +564,9 @@ IO.prototype = {
     _subscribeToTransportEvent: function() {
         if(this._transport) {
 
-            this._transport.on('onReady', function() {
-                Sonotone.log("SONOTONE.IO", "Transport successfully connected");
-                this._callbacks.trigger('onTransportReady', null);
+            this._transport.on('onReady', function(msg) {
+                Sonotone.log("SONOTONE.IO", "Transport successfully connected", msg);
+                this._callbacks.trigger('onTransportReady', msg);
             }, this);
 
             this._transport.on('onMessage', function(msg) {
@@ -610,13 +622,13 @@ IO.prototype = {
 
             }, this);
 
-            this._transport.on('onClose', function() {
-                Sonotone.log("SONOTONE.IO", "Transport connection closed");
-                this._callbacks.trigger('onTransportClose', null);
+            this._transport.on('onClose', function(msg) {
+                Sonotone.log("SONOTONE.IO", "Transport connection closed", msg);
+                this._callbacks.trigger('onTransportClose', msg);
             }, this);  
 
             this._transport.on('onError', function(msg) {
-                Sonotone.log("SONOTONE.IO", "Transport error:" + JSON.stringify(msg));
+                Sonotone.log("SONOTONE.IO", "Transport error", msg);
                 this._callbacks.trigger('onTransportError', msg);
             }, this);
 
@@ -647,19 +659,22 @@ IO.prototype = {
                 Sonotone.log("SONOTONE.IO", "Local Video Media stopped");
 
                 for(var peerID in this._peerConnections) {
-                    that.peerConnections(peerID).detach(that.localMedia().streamVideo());
 
-                    //Inform other (SIG) about stopping call
-                    var message = {
-                        data: {
-                            type: 'bye',
-                        },
-                        media: 'video',
-                        caller: Sonotone.ID,
-                        callee: peerID.substring(1)
-                    };
+                    if(peerID.substring(0,1) === 'v') {
+                        that.peerConnections(peerID).detach(that.localMedia().streamVideo());
 
-                    that._transport.send(message);
+                        //Inform other (SIG) about stopping call
+                        var message = {
+                            data: {
+                                type: 'bye',
+                            },
+                            media: 'video',
+                            caller: Sonotone.ID,
+                            callee: peerID.substring(1)
+                        };
+
+                        that._transport.send(message);    
+                    }
                 }
 
             }, this);
@@ -668,19 +683,22 @@ IO.prototype = {
                 Sonotone.log("SONOTONE.IO", "Local Screen Media stopped");
 
                 for(var peerID in this._peerConnections) {
-                    that.peerConnections(peerID).detach(that.localMedia().streamScreen());
 
-                    //Inform other (SIG) about stopping call
-                    var message = {
-                        data: {
-                            type: 'bye',
-                        },
-                        caller: Sonotone.ID,
-                        callee: peerID.substring(1),
-                        media: 'screen',
-                    };
+                    if(peerID.substring(0,1) === 's') {
+                        that.peerConnections(peerID).detach(that.localMedia().streamScreen());
 
-                    that._transport.send(message);
+                        //Inform other (SIG) about stopping call
+                        var message = {
+                            data: {
+                                type: 'bye',
+                            },
+                            caller: Sonotone.ID,
+                            callee: peerID.substring(1),
+                            media: 'screen',
+                        };
+
+                        that._transport.send(message);    
+                    }
                 }
 
             }, this);            
@@ -722,32 +740,49 @@ IO.prototype = {
 
         // Listen to candidates
         peer.on('onICECandiateReceived', function(event) {
-            Sonotone.log("SONOTONE.IO", "Send ICE Candidate received by Peer Connection <" + peer.ID() + ">");
+            
+            // Only send this message when no using a SIP transport
+            if(this._transport.type() !== 'sip') {
+                
+                if(!peer.isConnected) {
 
-            if(!peer.isConnected) {
+                    Sonotone.log("SONOTONE.IO", "Send ICE Candidate received by Peer Connection <" + peer.ID() + ">");
 
-                var message = {
-                    data: {
-                        type: 'candidate',
-                        label: event.candidate.sdpMLineIndex,
-                        id: event.candidate.sdpMid,
-                        candidate: event.candidate.candidate
-                    },
-                    caller: Sonotone.ID,
-                    callee: peer.ID().substring(1),
-                    media: this._getMediaUsed(peer)
-                };
+                    var message = {
+                        data: {
+                            type: 'candidate',
+                            label: event.candidate.sdpMLineIndex,
+                            id: event.candidate.sdpMid,
+                            candidate: event.candidate.candidate
+                        },
+                        caller: Sonotone.ID,
+                        callee: peer.ID().substring(1),
+                        media: this._getMediaUsed(peer)
+                    };
 
-                this._transport.send(message);
-            }
-            else {
-                Sonotone.log("SONOTONE.IO", "Do not send ICE Candidate because Peer Connection <" + peer.ID() + "> is already connected");
+                    this._transport.send(message);
+                }
+                else {
+                    Sonotone.log("SONOTONE.IO", "Do not send ICE Candidate because Peer Connection <" + peer.ID() + "> is already connected");
+                }    
             }
 
         }, this);
 
         // Listen to end of candidate
-        peer.on('onICECandidateEnd', function() {
+        peer.on('onICECandidateEnd', function(message) {
+
+            
+            // Special case of SIP transport: Send SDP only when ICE candidate are all received
+            if(this._transport.type() === 'sip') {
+                
+                Sonotone.log("SONOTONE.IO", "Send the complete SDP to PeerConnection <" + peer.ID() + '>');
+
+                
+                this._transport.send(message);
+            }
+
+            
             if(this._tmpCandidate !== null && this._tmpCandidate.length > 0) {
 
                 Sonotone.log("SONOTONE.IO", "Add previously stored Candidate to PeerConnection <" + peer.ID() + ">");
@@ -765,7 +800,7 @@ IO.prototype = {
         // Listen to new remote stream
         peer.on('onRemoteStreamReceived', function(event) {
 
-            Sonotone.log("SONOTONE.IO", "Create the Remote Media with this remote stream received");
+            Sonotone.log("SONOTONE.IO", "Create the Remote Media with this remote stream received for PeerConection <" + peer.ID() + ">");
             this._remoteMedia.stream(event.stream, peer.ID(), peer.media());
 
         }, this);
@@ -778,16 +813,22 @@ IO.prototype = {
         // Listen to Offer to send 
         peer.on('onSDPOfferToSend', function(event) {
 
-            // Send this message to the remote peer
-            this._transport.send(event);
+            //Only send this message when transport is not a SIP transport
+            if(this._transport.type() !== 'sip') {
+                // Send this message to the remote peer
+                this._transport.send(event);
+            }
 
         }, this);
 
         // Listen to Answer to send
         peer.on('onSDPAnswerToSend', function(event) {
 
-            // Send this message to the remote peer
-            this._transport.send(event);
+            //Only send this message when transport is not a SIP transport
+            if(this._transport.type() !== 'sip') {
+                // Send this message to the remote peer
+                this._transport.send(event);    
+            }
 
         }, this);
 
@@ -838,8 +879,9 @@ IO.prototype = {
         }, this);
 
         // A change has been made that need a renegotiation
+        // Should be used only if a connection already exists
         peer.on('onNegotiationNeeded', function() {
-            peer.createOffer(this._getMediaUsed(peer), false, null);
+            peer.createOffer(this._getMediaUsed(peer), false, null);                
         }, this);
 
         // Listen to a new file received

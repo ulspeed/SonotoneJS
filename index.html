@@ -143,6 +143,7 @@
     <button type="button" onclick="addVideoToCall();">Add Video</button>
     <button type="button" onclick="stopVideo();">Stop Video</button>
     <span>&nbsp;|&nbsp;</span>
+    <button type="button" onclick="seeMyScreen();">See my Screen</button>
     <button type="button" onclick="share();">Pick my Screen</button>
     <button type="button" onclick="callScreen();">ScreenCall a Peer</button>
     <button type="button" onclick="endScreen();">Stop Screen</button>
@@ -165,13 +166,14 @@
     <input type="file" id="fileElt">
     <button type="button" onclick="sendFile();">Send File</button>
     <br>
+    <button type="button" onclick="callSIP();">CallSIP</button>
 </div>
 
     <footer id="footer">
     </footer>
 
     <script type="text/javascript" src="dist/sonotone.js"></script>
-    <script type="text/javascript" src="./sip.js"></script>
+    <script type="text/javascript" src="./jssip.js"></script>
 
     <script>
 
@@ -185,6 +187,8 @@
         var bytesNow, bytesPrev = 0;
         var timestampPrev;
         var answerID = '';
+
+        var seeLocalScreen = false;
 
         function isCallPossible() {
           return (users.length > 0);
@@ -239,9 +243,21 @@
             sono.remoteMedia().on('onRemoteScreenStreamEnded', onRemoteStreamEnded, this);
 
             // Define your transport layer (WebSocket)
-            //sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
-            sono.transport('websocket', {host: '172.26.134.23', port: '1337'}).connect({})
+            sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
+            //sono.transport('websocket', {host: '172.26.134.23', port: '1337'}).connect({})            
+            //sono.transport('websocket', {host: '172.26.165.198', port: '1337'}).connect({})
+            // sono.transport('sip', null).connect({
+            //   display_name: 'Olivier',
+            //   ws_servers: 'ws://172.25.122.162:8060',
+            //   uri: 'AAAA2222@172.25.122.162',
+            //   password: '123456',
+            //   register: true,
+            //   trace_sip: true
+            // });
+        };
 
+        function callSIP() {
+          sono.call('AAAA7070@172.25.122.162', 'video', false);
         };
 
 
@@ -357,6 +373,16 @@
 
 
 /* --------------- Screen Features ---------------- */
+
+        
+
+
+        function seeMyScreen() {
+          seeLocalScreen = true;
+          document.getElementById('localVideo').style.display = 'none';
+          document.getElementById('remoteVideo').style.display = 'none';
+          sono.localMedia().acquireScreen();
+        };        
 
 
         function share() {
@@ -514,7 +540,7 @@
 
           navigator.webkitPersistentStorage.requestQuota(10*1024*1024, function(grantedBytes){
 
-            window.webkitRequestFileSystem(window.PERSISTENT, grantedBytes, function(fs) {
+            window.webkitRequestFileSystem(window.TEMPORARY, grantedBytes, function(fs) {
     
               fs.root.getFile(msg.data.info.fileName, {create: true}, function(fileEntry) {
                 // Create a FileWriter object for our FileEntry (log.txt).
@@ -638,7 +664,11 @@
         };
 
         function onLocalScreenStreamStarted(stream) {
-          //sono.localMedia().renderScreenStream(document.getElementById('localScreen'));
+          if(seeLocalScreen) {
+            sono.localMedia().renderScreenStream(document.getElementById('remoteScreen'));  
+            seeLocalScreen = false;
+          }
+          
           isSharing = true;
         };
 

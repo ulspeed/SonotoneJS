@@ -29,6 +29,10 @@ var WebSocketTransport = Sonotone.IO.WebSocketTransport = function(config, caps)
 
 WebSocketTransport.prototype = {
 
+    type: function() {
+        return "websocket";
+    },
+
     /**
      * Connect the Transport
      * @param {Object} data The user capabilities that have to be transmitted to others peers (nickname, audio/video capabilities...)
@@ -52,6 +56,12 @@ WebSocketTransport.prototype = {
 
             var that = this;
 
+            if(data) {
+                for (var prop in data) {
+                    this._caps[prop] = data[prop];
+                }    
+            }
+
             this._socket.onopen = function(msg) {
                 Sonotone.log("TRANSPORT", "Channel Ready");
                 that._transportReady = true;
@@ -61,7 +71,6 @@ WebSocketTransport.prototype = {
                     {
                         data: {
                             type: 'join',
-                            data: data,
                             caps: that._caps
                         },
                         caller: Sonotone.ID, 
