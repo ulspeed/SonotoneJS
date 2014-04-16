@@ -409,6 +409,11 @@ IO.prototype = {
                 break;
 
         }
+
+        if(this._transport.type() === 'sip'){
+            this._transport.setPeer(peer.peer());
+        } 
+
         peer.createOffer(media, withDataChannel, null);
     },
 

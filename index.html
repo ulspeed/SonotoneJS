@@ -166,14 +166,17 @@
     <input type="file" id="fileElt">
     <button type="button" onclick="sendFile();">Send File</button>
     <br>
+
     <button type="button" onclick="callSIP();">CallSIP</button>
+    <button type="button" onclick="desktop();">Desktop</button>
+
 </div>
 
     <footer id="footer">
     </footer>
 
     <script type="text/javascript" src="dist/sonotone.js"></script>
-    <script type="text/javascript" src="./jssip.js"></script>
+    <script type="text/javascript" src="./jssip-0.3.7.js"></script>
 
     <script>
 
@@ -246,20 +249,62 @@
             sono.transport('websocket', {host: '192.168.0.126', port: '1337'}).connect({});
             //sono.transport('websocket', {host: '172.26.134.23', port: '1337'}).connect({})            
             //sono.transport('websocket', {host: '172.26.165.198', port: '1337'}).connect({})
-            // sono.transport('sip', null).connect({
-            //   display_name: 'Olivier',
-            //   ws_servers: 'ws://172.25.122.162:8060',
-            //   uri: 'AAAA2222@172.25.122.162',
-            //   password: '123456',
-            //   register: true,
-            //   trace_sip: true
+            //  sono.transport('sip', null).connect({
+            //    display_name: 'Olivier',
+            //    ws_servers: 'ws://172.25.122.162:8060',
+            //    uri: 'AAAA6020@172.25.122.162',
+            //    password: '201313',
+            //    register: true,
+            //    trace_sip: true
             // });
         };
 
         function callSIP() {
-          sono.call('AAAA7070@172.25.122.162', 'video', false);
+          sono.call('AAAA6030@172.25.122.162', 'video', false);
         };
 
+        function desktop() {
+          // The ID of the extension we want to talk to.
+          var editorExtensionId = "meccllpfhfmamingegojnnbpglmehhdf";
+
+          // chrome.runtime.sendMessage(editorExtensionId, {action: 'start'},
+          //   function(response) {
+          //     console.log("Answered", response);
+
+          //     sono.localMedia().streamScreen = response.stream;
+          //     sono.localMedia().renderScreenStream(document.getElementById('remoteScreen'));  
+
+          // });
+        
+          var port = chrome.runtime.connect(editorExtensionId);
+
+          port.onMessage.addListener(function(msg) {
+            console.log("answered", msg);
+            
+            navigator.webkitGetUserMedia(
+              {
+                audio:false,
+                video: { 
+                  mandatory: { 
+                    chromeMediaSource: "desktop", 
+                    chromeMediaSourceId: msg.stream 
+                  } 
+                }
+              }, function(stream) {
+
+                console.log("STREAM:", stream);
+
+                var video = document.querySelector("#remoteScreen");
+
+                video.src = window.URL.createObjectURL(stream);
+              }, function(err) {
+              console.log("ERROR", err);
+              }
+            );
+          });
+
+          port.postMessage({video: null});
+        };
 
 /* --------------- WebRTC APIs ---------------- */
 

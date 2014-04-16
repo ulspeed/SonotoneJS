@@ -11,6 +11,8 @@ var SIPTransport = Sonotone.IO.SIPTransport = function() {
     this._call = null;
 
     this._callbacks = new Sonotone.IO.Events();
+
+    this._peer = null;
 };
 
 /**
@@ -100,7 +102,21 @@ SIPTransport.prototype = {
 
     send: function(JSONMessage) {
         console.log("SEND SIP", JSONMessage);
-    }
 
+        console.log("PEER", this._peer);
+
+        if(JSONMessage.data.type === 'offer') {
+            this._softPhone.call(JSONMessage.callee, {
+                'extraHeaders': [ 'X-Foo: foo', 'X-Bar: bar'],
+                'RTCConstraints': {"optional" : [{'DtlsSrtpKeyAgreement': true}]},
+                'mediaConstraints': {'audio': true, 'video': false}
+            }, JSONMessage.data.sdp, this._peer);
+        }
+
+    },
+
+    setPeer: function(peer) {
+        this._peer = peer;
+    }
 
 };

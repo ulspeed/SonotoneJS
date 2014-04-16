@@ -240,6 +240,7 @@ LocalMedia.prototype = {
             var video_constraints = {
                 mandatory: { 
                     chromeMediaSource: 'screen',
+
                     maxWidth: maxWidth,
                     maxHeight: maxHeight
                 },
